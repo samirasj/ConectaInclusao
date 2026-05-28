@@ -1,0 +1,130 @@
+/* ConectaInclusao - design system base
+   Contraste WCAG AA, tipografia grande, foco visivel. */
+
+:root {
+  --color-bg: #0b1d2a;
+  --color-surface: #102a3a;
+  --color-text: #f5f7fa;
+  --color-text-muted: #c9d3dc;
+  --color-primary: #ffd23f;   /* amarelo alto contraste sobre fundo escuro */
+  --color-primary-text: #0b1d2a;
+  --color-accent: #4fc3f7;
+  --color-focus: #ffd23f;
+
+  --font-base: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-size-base: 1.125rem; /* 18px */
+
+  --radius-md: 12px;
+  --space-sm: 0.75rem;
+  --space-md: 1.25rem;
+  --space-lg: 2rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 18px;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-base);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  min-height: 100vh;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md);
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+
+.hero h1 {
+  font-size: 2.75rem;
+  margin: 0 0 var(--space-sm);
+  color: var(--color-primary);
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.roles {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.roles h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.roles__grid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: var(--space-md);
+}
+
+.role-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.25rem;
+  padding: var(--space-lg) var(--space-md);
+  min-height: 96px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary);
+  color: var(--color-primary-text);
+  border: 3px solid transparent;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.role-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-accent);
+}
+
+.role-btn:active {
+  transform: translateY(0);
+}
+
+.footer {
+  margin-top: var(--space-lg);
+  text-align: center;
+}
+
+.health-link {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  text-decoration: underline;
+}
+
+.health-link:hover {
+  color: var(--color-primary);
+}

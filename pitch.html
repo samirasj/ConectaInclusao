@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conecta Inclusão · Pitch</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800;9..144,900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS — herdam do MVP, mas com mais drama visual
+       ============================================================ */
+    :root {
+      --ink: #0E1219;
+      --ink-soft: #4A5266;
+      --ink-mute: #8089A0;
+      --bg: #FDF8EE;
+      --surface: #FFFFFF;
+      --primary: #0F4C5C;
+      --primary-soft: #1B6E81;
+      --primary-deep: #062029;
+      --accent: #E36414;
+      --accent-soft: #FB8B24;
+      --accent-tint: #FCE6D2;
+      --highlight: #F4D35E;
+      --cream: #FDF8EE;
+
+      --font-sans: 'Lexend', system-ui, sans-serif;
+      --font-display: 'Fraunces', Georgia, serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--font-sans);
+      color: var(--ink);
+      background: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================================
+       ESTRUTURA DE SLIDES
+       ============================================================ */
+    .deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+    .slide {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      padding: 6vh 8vw;
+      opacity: 0;
+      transform: translateX(40px) scale(0.98);
+      transition: opacity 480ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                  transform 480ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      pointer-events: none;
+      overflow-y: auto;
+    }
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+      pointer-events: auto;
+    }
+    .slide.previous { transform: translateX(-40px) scale(0.98); }
+
+    /* Cada slide tem tema próprio */
+    .slide-cover { background: var(--primary-deep); color: var(--cream); }
+    .slide-problem { background: var(--ink); color: var(--cream); }
+    .slide-people { background: var(--cream); color: var(--ink); }
+    .slide-solution { background: var(--primary); color: var(--cream); }
+    .slide-howit { background: var(--cream); color: var(--ink); }
+    .slide-diff { background: var(--ink); color: var(--cream); }
+    .slide-market { background: var(--cream); color: var(--ink); }
+    .slide-business { background: var(--primary); color: var(--cream); }
+    .slide-demo { background: var(--accent); color: var(--ink); }
+    .slide-vision { background: var(--primary-deep); color: var(--cream); }
+
+    /* ============================================================
+       TIPOGRAFIA — gigante, pra projetar
+       ============================================================ */
+    h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; }
+    h1 { font-size: clamp(2.5rem, 7vw, 6rem); }
+    h2 { font-size: clamp(2rem, 5vw, 4.5rem); }
+    h3 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); font-weight: 600; }
+    p { font-size: clamp(1.1rem, 1.6vw, 1.6rem); line-height: 1.55; }
+    .big-number { font-family: var(--font-display); font-weight: 900; font-size: clamp(8rem, 18vw, 18rem); letter-spacing: -0.06em; line-height: 0.85; }
+    .eyebrow {
+      font-family: var(--font-sans); text-transform: uppercase;
+      letter-spacing: 0.16em; font-weight: 600; font-size: 0.8rem;
+      opacity: 0.7;
+    }
+
+    /* ============================================================
+       LAYOUTS COMUNS
+       ============================================================ */
+    .slide-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: auto; }
+    .slide-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; opacity: 0.5; font-size: 0.85rem; }
+    .center-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+    /* ============================================================
+       SLIDE 1 — CAPA
+       ============================================================ */
+    .cover-mark {
+      width: 100px; height: 100px;
+      background: var(--accent);
+      border-radius: 24px;
+      display: grid; place-items: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 2.5rem;
+      color: white;
+      margin-bottom: 4vh;
+      box-shadow: 0 20px 60px rgba(227, 100, 20, 0.4);
+    }
+    .cover-title {
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 0.95;
+      margin-bottom: 2vh;
+    }
+    .cover-title span { color: var(--accent-soft); display: block; font-style: italic; font-weight: 400; }
+    .cover-tagline {
+      font-size: clamp(1.2rem, 2vw, 1.8rem);
+      max-width: 720px;
+      opacity: 0.85;
+      margin-bottom: 5vh;
+      line-height: 1.4;
+    }
+    .cover-team { font-size: 0.9rem; opacity: 0.6; line-height: 1.8; }
+    .cover-team strong { color: var(--accent-soft); }
+
+    /* ============================================================
+       SLIDE 2 — PROBLEMA (estatística gigante)
+       ============================================================ */
+    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; align-items: center; flex: 1; }
+    .problem-stat { color: var(--accent-soft); }
+    .problem-text { font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2.5rem); line-height: 1.2; }
+    .problem-text em { color: var(--accent-soft); font-style: italic; }
+    .problem-source { margin-top: 3vh; opacity: 0.5; font-size: 0.85rem; font-family: var(--font-sans); font-style: normal; }
+
+    /* ============================================================
+       SLIDE 3 — PESSOAS / PERSONAS
+       ============================================================ */
+    .persona-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3vw; flex: 1; align-content: center; }
+    .persona {
+      background: white;
+      border: 2px solid #E5DCC6;
+      border-radius: 24px;
+      padding: 3vw 2.5vw;
+      display: flex; flex-direction: column;
+      gap: 1.5vh;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+    }
+    .persona-icon {
+      width: 64px; height: 64px;
+      background: var(--primary);
+      color: white;
+      border-radius: 16px;
+      display: grid; place-items: center;
+      font-size: 32px;
+    }
+    .persona-name { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; }
+    .persona-quote {
+      font-family: var(--font-display); font-style: italic;
+      font-size: 1.1rem; color: var(--ink-soft);
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+    }
+    .persona-pain { font-size: 0.95rem; color: var(--ink-soft); line-height: 1.5; }
+
+    /* ============================================================
+       SLIDE 4 — SOLUÇÃO
+       ============================================================ */
+    .solution-name {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(4rem, 12vw, 12rem);
+      line-height: 0.9;
+      letter-spacing: -0.04em;
+    }
+    .solution-name span { display: block; font-style: italic; font-weight: 400; }
+    .solution-pillar-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5vw; margin-top: 5vh; }
+    .pillar {
+      padding: 2.5vw 2vw;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+    }
+    .pillar-num {
+      font-family: var(--font-display); font-weight: 800;
+      font-size: 3rem; color: var(--accent-soft); margin-bottom: 1rem;
+    }
+    .pillar-title { font-weight: 700; font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .pillar-desc { font-size: 0.95rem; opacity: 0.8; line-height: 1.5; }
+
+    /* ============================================================
+       SLIDE 5 — COMO FUNCIONA (fluxo)
+       ============================================================ */
+    .flow { display: flex; align-items: stretch; justify-content: space-between; gap: 1vw; margin-top: 4vh; }
+    .flow-step { flex: 1; text-align: center; position: relative; }
+    .flow-icon {
+      width: 80px; height: 80px;
+      background: var(--primary);
+      color: white;
+      border-radius: 20px;
+      display: grid; place-items: center;
+      margin: 0 auto 1.5vh;
+      font-size: 36px;
+      box-shadow: 0 8px 24px rgba(15, 76, 92, 0.2);
+    }
+    .flow-step.is-accent .flow-icon { background: var(--accent); box-shadow: 0 8px 24px rgba(227, 100, 20, 0.3); }
+    .flow-label { font-weight: 700; font-size: 1.05rem; margin-bottom: 0.5rem; }
+    .flow-desc { font-size: 0.85rem; color: var(--ink-soft); line-height: 1.4; }
+    .flow-arrow {
+      align-self: center;
+      font-size: 2rem; color: var(--accent);
+      flex: 0 0 auto;
+      padding: 0 0.5vw;
+      margin-bottom: 6vh;
+    }
+
+    /* ============================================================
+       SLIDE 6 — DIFERENCIAIS
+       ============================================================ */
+    .diff-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.5vw; flex: 1; align-content: center; }
+    .diff-card {
+      padding: 3vw 2.5vw;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+    }
+    .diff-card-num {
+      font-family: var(--font-display); font-weight: 800;
+      font-size: 2.5rem; color: var(--accent-soft); margin-bottom: 0.5rem; display: block;
+    }
+    .diff-card-title {
+      font-family: var(--font-display); font-size: 1.6rem; font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+    .diff-card-desc { font-size: 1rem; opacity: 0.85; line-height: 1.5; }
+    .diff-card-desc strong { color: var(--accent-soft); }
+
+    /* ============================================================
+       SLIDE 7 — MERCADO
+       ============================================================ */
+    .market-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3vw; flex: 1; align-content: center; }
+    .market-stat { padding: 2vw 0; }
+    .market-num {
+      font-family: var(--font-display); font-weight: 800;
+      font-size: clamp(3rem, 6vw, 5rem); color: var(--primary); display: block;
+      line-height: 0.9; margin-bottom: 1rem;
+    }
+    .market-label { font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .market-desc { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.5; }
+
+    /* ============================================================
+       SLIDE 8 — MODELO DE NEGÓCIO
+       ============================================================ */
+    .biz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; flex: 1; align-items: center; }
+    .biz-left h2 { margin-bottom: 2vh; }
+    .biz-left p { opacity: 0.85; max-width: 480px; margin-bottom: 1.5vh; }
+    .biz-cards { display: flex; flex-direction: column; gap: 2vh; }
+    .biz-card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 16px;
+      padding: 2.5vw 2vw;
+    }
+    .biz-card-price {
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 2.5rem; color: var(--accent-soft); display: block; line-height: 1;
+    }
+    .biz-card-price small { font-size: 1rem; opacity: 0.7; font-weight: 400; }
+    .biz-card-name { font-weight: 600; font-size: 1.1rem; margin: 0.5rem 0 0.3rem; }
+    .biz-card-desc { font-size: 0.9rem; opacity: 0.8; }
+
+    /* ============================================================
+       SLIDE 9 — DEMO / MVP
+       ============================================================ */
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; flex: 1; align-items: center; }
+    .demo-left h2 { color: var(--ink); margin-bottom: 2vh; }
+    .demo-checklist { list-style: none; padding: 0; margin: 3vh 0; }
+    .demo-checklist li {
+      padding: 1vh 0; font-size: 1.1rem; display: flex; gap: 0.8rem; align-items: flex-start;
+    }
+    .demo-checklist li::before {
+      content: '✓'; color: var(--primary); font-weight: 800;
+      background: var(--cream); border-radius: 50%;
+      width: 28px; height: 28px; display: grid; place-items: center; flex-shrink: 0;
+    }
+    .demo-screen {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+      padding: 2vw;
+      transform: rotate(-1.5deg);
+      transition: transform 200ms;
+    }
+    .demo-screen:hover { transform: rotate(0deg); }
+    .demo-screen-bar { display: flex; gap: 6px; margin-bottom: 1vw; }
+    .demo-screen-bar span { width: 12px; height: 12px; border-radius: 50%; background: #E5DCC6; }
+    .demo-screen-bar span:first-child { background: #FF5F57; }
+    .demo-screen-bar span:nth-child(2) { background: #FEBC2E; }
+    .demo-screen-bar span:nth-child(3) { background: #28C840; }
+    .demo-content {
+      background: linear-gradient(135deg, #E0EEF1, #FDF8EE);
+      border-radius: 12px;
+      padding: 2.5vw;
+      min-height: 280px;
+      display: flex; flex-direction: column; gap: 1.5vh;
+    }
+    .demo-bubble {
+      background: white;
+      border-radius: 12px;
+      padding: 1.2vw;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .demo-bubble strong { color: var(--primary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .demo-bubble p { font-size: 0.95rem; margin-top: 0.3rem; color: var(--ink); }
+    .demo-bubble.is-accent { border-left: 3px solid var(--accent); }
+    .demo-bubble.is-accent strong { color: var(--accent); }
+
+    /* ============================================================
+       SLIDE 10 — VISÃO / FECHAMENTO
+       ============================================================ */
+    .vision-quote {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      max-width: 1100px;
+    }
+    .vision-quote em { color: var(--accent-soft); font-style: italic; }
+    .vision-cta {
+      display: inline-flex; align-items: center; gap: 1rem;
+      margin-top: 5vh;
+      padding: 1.2rem 2.5rem;
+      background: var(--accent);
+      color: white;
+      border-radius: 60px;
+      font-weight: 600; font-size: 1.2rem;
+      box-shadow: 0 12px 32px rgba(227, 100, 20, 0.4);
+    }
+
+    /* ============================================================
+       CONTROLES DE NAVEGAÇÃO
+       ============================================================ */
+    .nav-controls {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; align-items: center; gap: 16px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 100px;
+      padding: 8px 16px;
+      z-index: 100;
+    }
+    .nav-btn {
+      width: 44px; height: 44px;
+      background: rgba(255, 255, 255, 0.15);
+      border: none; border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: grid; place-items: center;
+      transition: background 200ms;
+    }
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.3); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .nav-counter {
+      color: white;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 500;
+      min-width: 60px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .nav-progress {
+      position: fixed; top: 0; left: 0;
+      height: 4px; background: var(--accent);
+      transition: width 480ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      z-index: 99;
+    }
+
+    .hint {
+      position: fixed; top: 24px; right: 24px;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.8rem;
+      font-family: var(--font-sans);
+      z-index: 100;
+      display: flex; gap: 8px; align-items: center;
+    }
+    .hint kbd {
+      background: rgba(255,255,255,0.15);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      font-family: var(--font-sans);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    /* Cards no slide 9 precisam de ajuste de cor pois fundo é laranja */
+    .slide-demo .demo-left { color: var(--ink); }
+    .slide-demo .demo-left p { opacity: 0.85; }
+
+    /* Responsivo simples */
+    @media (max-width: 900px) {
+      .slide { padding: 5vh 6vw; }
+      .persona-grid, .market-row, .biz-grid, .demo-grid { grid-template-columns: 1fr; gap: 3vh; }
+      .flow { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); margin: 0; }
+      .solution-pillar-row, .diff-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .slide { transition: opacity 100ms; transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="nav-progress" id="progress"></div>
+
+  <div class="hint">
+    <span>navegue com</span>
+    <kbd>←</kbd><kbd>→</kbd><kbd>espaço</kbd>
+    <span style="margin-left: 8px;">tela cheia</span><kbd>F</kbd>
+  </div>
+
+  <div class="deck" id="deck">
+
+    <!-- ====================================================
+         SLIDE 1 — CAPA
+         ==================================================== -->
+    <section class="slide slide-cover active" data-slide="1">
+      <div class="slide-header">
+        <div class="eyebrow">Do Piauí para o Mundo · 2026</div>
+        <div class="eyebrow">CETI Prof. Ubiraci Carvalho · 5ª GRE</div>
+      </div>
+
+      <div class="center-content">
+        <div class="cover-mark">CI</div>
+        <h1 class="cover-title">Conecta<br><span>Inclusão.</span></h1>
+        <p class="cover-tagline">
+          Acessibilidade real, em tempo real, para todas as salas de aula da rede pública.
+          Tradução em Libras, audiodescrição e legendagem com IA — numa única plataforma.
+        </p>
+        <div class="cover-team">
+          <div><strong>EQUIPE</strong> · Debora Yasmim · Fábio Vieira · Hernandes Lima · Ryan Gabriel · Samira Soares</div>
+          <div><strong>ORIENTAÇÃO</strong> · Profa. Ismara Araújo Nogueira</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>São João da Serra · Piauí · 2026</span>
+        <span>1/10</span>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 2 — PROBLEMA
+         ==================================================== -->
+    <section class="slide slide-problem" data-slide="2">
+      <div class="slide-header">
+        <div class="eyebrow">O problema</div>
+        <div class="eyebrow">02</div>
+      </div>
+
+      <div class="problem-grid">
+        <div>
+          <div class="big-number problem-stat">180mil</div>
+          <p style="margin-top: 2vh; opacity: 0.7; font-size: 1.1rem;">
+            alunos surdos e cegos no ensino médio público brasileiro.
+          </p>
+        </div>
+        <div>
+          <p class="problem-text">
+            Todos os dias, eles vivem o
+            <em>silêncio pedagógico</em>
+            e a <em>exclusão visual</em> — aulas que não chegam a eles.
+          </p>
+          <p class="problem-source">Fonte: INEP, Censo Escolar 2023.</p>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>O ensino existe. A acessibilidade, não.</span>
+        <span>2/10</span>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 3 — PESSOAS / PERSONAS
+         ==================================================== -->
+    <section class="slide slide-people" data-slide="3">
+      <div class="slide-header">
+        <div class="eyebrow" style="color: var(--ink-soft);">Quem sofre, hoje</div>
+        <div class="eyebrow" style="color: var(--ink-soft);">03</div>
+      </div>
+
+      <div class="center-content">
+        <h2 style="margin-bottom: 5vh;">Três pessoas que precisam<br>de uma resposta agora.</h2>
+
+        <div class="persona-grid">
+          <div class="persona">
+            <div class="persona-icon">🤟</div>
+            <div class="persona-name">A aluna surda</div>
+            <p class="persona-quote">"Eu olho a boca do professor e tento adivinhar."</p>
+            <p class="persona-pain">Português escrito não é sua língua materna. Legendas literais não bastam. Precisa de Libras.</p>
+          </div>
+
+          <div class="persona">
+            <div class="persona-icon" style="background: var(--accent);">👂</div>
+            <div class="persona-name">O aluno cego</div>
+            <p class="persona-quote">"Quando o professor mostra um gráfico, eu desapareço."</p>
+            <p class="persona-pain">Leitor de tela lê o texto, mas não descreve gráficos, mapas, fotos. Precisa de audiodescrição.</p>
+          </div>
+
+          <div class="persona">
+            <div class="persona-icon" style="background: var(--ink);">📘</div>
+            <div class="persona-name">A professora</div>
+            <p class="persona-quote">"Eu queria ensinar todos. Mas não dou conta sozinha."</p>
+            <p class="persona-pain">Sem formação em Libras. Sem tempo de preparar material adaptado. Faz o que pode.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span style="color: var(--ink-soft);">A jornada estendida das escolas de tempo integral amplia essa desigualdade.</span>
+        <span style="color: var(--ink-soft);">3/10</span>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 4 — SOLUÇÃO
+         ==================================================== -->
+    <section class="slide slide-solution" data-slide="4">
+      <div class="slide-header">
+        <div class="eyebrow">Nossa resposta</div>
+        <div class="eyebrow">04</div>
+      </div>
+
+      <div class="center-content">
+        <h2 class="solution-name">Conecta<br><span>Inclusão.</span></h2>
+        <p style="font-size: 1.4rem; opacity: 0.9; max-width: 760px; margin-top: 3vh;">
+          Uma plataforma multimodal que converte qualquer aula em conteúdo acessível — Libras, áudio, legendas e adaptação visual — automaticamente, em tempo real.
+        </p>
+
+        <div class="solution-pillar-row">
+          <div class="pillar">
+            <div class="pillar-num">01</div>
+            <div class="pillar-title">Auditivo</div>
+            <div class="pillar-desc">Avatar 3D em Libras + legendagem automática da fala do professor.</div>
+          </div>
+          <div class="pillar">
+            <div class="pillar-num">02</div>
+            <div class="pillar-title">Visual</div>
+            <div class="pillar-desc">IA descreve gráficos, mapas e imagens com voz natural.</div>
+          </div>
+          <div class="pillar">
+            <div class="pillar-num">03</div>
+            <div class="pillar-title">Adaptativo</div>
+            <div class="pillar-desc">Contraste, fonte, espaçamento e simplificação textual sob medida.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Três módulos. Uma única interface. Para toda sala de aula.</span>
+        <span>4/10</span>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 5 — COMO FUNCIONA
+         ==================================================== -->
+    <section class="slide slide-howit" data-slide="5">
+      <div class="slide-header">
+        <div class="eyebrow" style="color: var(--ink-soft);">Como funciona</div>
+        <div class="eyebrow" style="color: var(--ink-soft);">05</div>
+      </div>
+
+      <div class="center-content">
+        <h2>Em segundos. Sem esforço extra do professor.</h2>
+        <p style="color: var(--ink-soft); max-width: 720px; margin-top: 1.5vh; font-size: 1.2rem;">
+          O professor abre o painel, fala normalmente, envia o slide.
+          A plataforma faz o resto.
+        </p>
+
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-icon">🎙</div>
+            <div class="flow-label">Professor fala</div>
+            <div class="flow-desc">Microfone capta a aula naturalmente.</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step is-accent">
+            <div class="flow-icon">🤖</div>
+            <div class="flow-label">IA processa</div>
+            <div class="flow-desc">Reconhecimento de fala + visão computacional + Libras.</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-icon">🤟</div>
+            <div class="flow-label">Aluno surdo</div>
+            <div class="flow-desc">Recebe Libras + legendas no tablet.</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-icon">👂</div>
+            <div class="flow-label">Aluno cego</div>
+            <div class="flow-desc">Recebe audiodescrição em voz natural no fone.</div>
+          </div>
+        </div>
+
+        <p style="margin-top: 5vh; text-align: center; font-family: var(--font-display); font-style: italic; font-size: 1.4rem; color: var(--primary);">
+          Latência média do MVP: <strong>menos de 2 segundos</strong>.
+        </p>
+      </div>
+
+      <div class="slide-footer">
+        <span style="color: var(--ink-soft);">Web Speech API · VLibras (Governo Federal) · Claude AI</span>
+        <span style="color: var(--ink-soft);">5/10</span>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 6 — DIFERENCIAIS
+         ==================================================== -->
+    <section class="slide slide-diff" data-slide="6">
+      <div class="slide-header">
+        <div class="eyebrow">Por que somos diferentes</div>
+        <div class="eyebrow">06</div>
+      </div>
+
+      <div class="diff-grid">
+        <div class="diff-card">
+          <span class="diff-card-num">01</span>
+          <div class="diff-card-title">Multimodal real</div>
+          <div class="diff-card-desc">Libras + audiodescrição + adaptação visual na <strong>mesma plataforma</strong>. Concorrentes só fazem uma coisa por vez.</div>
+        </div>
+        <div class="diff-card">
+          <span class="diff-card-num">02</span>
+          <div class="diff-card-title">Reúsa o que o Brasil já tem</div>
+          <div class="diff-card-desc">Integramos o <strong>VLibras oficial</strong> (Governo Federal). Não competimos com a política pública — somamos a ela.</div>
+        </div>
+        <div class="diff-card">
+          <span class="diff-card-num">03</span>
+          <div class="diff-card-title">Custo radicalmente baixo</div>
+          <div class="diff-card-desc">Roda no navegador. Sem app caro, sem infraestrutura pesada. <strong>~R$ 60 a 130 por mês</strong> para um piloto de 5 escolas.</div>
+        </div>
+        <div class="diff-card">
+          <span class="diff-card-num">04</span>
+          <div class="diff-card-title">Acessibilidade desde o primeiro pixel</div>
+          <div class="diff-card-desc">Construída com <strong>WCAG 2.1 AA</strong> como fundação, não como remendo. Validada com surdos e cegos reais.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Não é mais um app de Libras. É uma infraestrutura de inclusão.</span>
+        <span>6/10</span>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 7 — MERCADO E VALIDAÇÃO
+         ==================================================== -->
+    <section class="slide slide-market" data-slide="7">
+      <div class="slide-header">
+        <div class="eyebrow" style="color: var(--ink-soft);">Mercado e validação</div>
+        <div class="eyebrow" style="color: var(--ink-soft);">07</div>
+      </div>
+
+      <div class="center-content">
+        <h2 style="margin-bottom: 5vh;">Começamos no Piauí.<br>Mas o problema é nacional.</h2>
+
+        <div class="market-row">
+          <div class="market-stat">
+            <span class="market-num">180k</span>
+            <div class="market-label">TAM — Mercado total</div>
+            <div class="market-desc">Alunos PCD sensoriais no ensino médio público brasileiro.</div>
+          </div>
+          <div class="market-stat">
+            <span class="market-num">5</span>
+            <div class="market-label">Beachhead — Piloto</div>
+            <div class="market-desc">Escolas estaduais de tempo integral no Piauí, validando o MVP em sala real.</div>
+          </div>
+          <div class="market-stat">
+            <span class="market-num">3</span>
+            <div class="market-label">Parcerias estratégicas</div>
+            <div class="market-desc">SEDUC-PI, universidades para usabilidade, e associações de surdos e cegos para validação.</div>
+          </div>
+        </div>
+
+        <p style="margin-top: 5vh; font-size: 1.2rem; color: var(--ink-soft); text-align: center; max-width: 760px; margin-left: auto; margin-right: auto;">
+          A meta é reduzir a evasão escolar entre PCD sensoriais de <strong style="color: var(--accent);">22% para 8%</strong> em 1 ano.
+        </p>
+      </div>
+
+      <div class="slide-footer">
+        <span style="color: var(--ink-soft);">Potencial de expansão: Fundamental II, EJA, formação de professores.</span>
+        <span style="color: var(--ink-soft);">7/10</span>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 8 — MODELO DE NEGÓCIO
+         ==================================================== -->
+    <section class="slide slide-business" data-slide="8">
+      <div class="slide-header">
+        <div class="eyebrow">Como se sustenta</div>
+        <div class="eyebrow">08</div>
+      </div>
+
+      <div class="biz-grid">
+        <div class="biz-left">
+          <h2>Sustentável<br>e socialmente justo.</h2>
+          <p>Licenciamento SaaS para Secretarias de Educação, com isenção para escolas em vulnerabilidade.</p>
+          <p>Todo excedente é reinvestido em novas funcionalidades e suporte gratuito.</p>
+          <p style="opacity: 0.7; font-size: 0.95rem; margin-top: 2vh;">
+            Custo operacional do piloto: ~R$ 130/mês.<br>
+            Receita potencial do piloto: R$ 750/mês.<br>
+            <strong style="color: var(--accent-soft);">Margem para reinvestimento desde o mês 1.</strong>
+          </p>
+        </div>
+
+        <div class="biz-cards">
+          <div class="biz-card">
+            <span class="biz-card-price">R$ 1.800<small>/ano por escola</small></span>
+            <div class="biz-card-name">Plano Escola</div>
+            <div class="biz-card-desc">Até 200 alunos. Acesso completo, suporte e atualizações.</div>
+          </div>
+          <div class="biz-card">
+            <span class="biz-card-price">R$ 30<small>/mês por aluno PCD</small></span>
+            <div class="biz-card-name">Plano por Aluno</div>
+            <div class="biz-card-desc">Modelo proporcional ao impacto direto entregue.</div>
+          </div>
+          <div class="biz-card" style="background: rgba(244, 211, 94, 0.15); border-color: var(--highlight);">
+            <span class="biz-card-price" style="color: var(--highlight);">Grátis</span>
+            <div class="biz-card-name">Escolas em vulnerabilidade</div>
+            <div class="biz-card-desc">Custeado por crowdfunding e editais públicos de inovação.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Receita não é lucro. É reinvestimento em inclusão.</span>
+        <span>8/10</span>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 9 — DEMO / MVP
+         ==================================================== -->
+    <section class="slide slide-demo" data-slide="9">
+      <div class="slide-header">
+        <div class="eyebrow" style="color: var(--ink);">MVP funcionando</div>
+        <div class="eyebrow" style="color: var(--ink);">09</div>
+      </div>
+
+      <div class="demo-grid">
+        <div class="demo-left">
+          <h2>Não é maquete.<br>É código rodando.</h2>
+          <p style="font-size: 1.2rem;">Nosso MVP já entrega os três módulos, no navegador, hoje:</p>
+
+          <ul class="demo-checklist">
+            <li>Legendagem em tempo real (Web Speech API)</li>
+            <li>Avatar Libras integrado (VLibras)</li>
+            <li>Audiodescrição de imagens com IA</li>
+            <li>3 temas visuais e 3 tamanhos de fonte</li>
+            <li>Simplificação textual automática</li>
+            <li>Conformidade WCAG 2.1 AA</li>
+          </ul>
+
+          <p style="font-family: var(--font-display); font-style: italic; font-size: 1.3rem; margin-top: 2vh; color: var(--ink);">
+            Pronto para validar com usuários reais.
+          </p>
+        </div>
+
+        <div class="demo-screen">
+          <div class="demo-screen-bar"><span></span><span></span><span></span></div>
+          <div class="demo-content">
+            <div class="demo-bubble">
+              <strong>🎙 Professor (legenda ao vivo)</strong>
+              <p>"Vamos ver agora o gráfico de barras com o crescimento da educação no Piauí."</p>
+            </div>
+            <div class="demo-bubble is-accent">
+              <strong>🖼 IA — Audiodescrição</strong>
+              <p>Gráfico de barras verticais. Eixo vertical: matrículas em milhares. Crescimento de 18% entre 2020 e 2023.</p>
+            </div>
+            <div class="demo-bubble">
+              <strong>🤟 Aluno surdo (Libras)</strong>
+              <p>Avatar VLibras traduzindo a mesma frase em tempo real.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span style="color: var(--ink);">Demonstração ao vivo nos próximos minutos.</span>
+        <span style="color: var(--ink);">9/10</span>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 10 — VISÃO / FECHAMENTO
+         ==================================================== -->
+    <section class="slide slide-vision" data-slide="10">
+      <div class="slide-header">
+        <div class="eyebrow">A visão</div>
+        <div class="eyebrow">10</div>
+      </div>
+
+      <div class="center-content">
+        <p class="vision-quote">
+          A deficiência sensorial<br>
+          não define o limite do aprendizado.<br>
+          <em>A falta de tecnologia, sim.</em>
+        </p>
+
+        <p style="margin-top: 4vh; font-size: 1.3rem; opacity: 0.85; max-width: 760px;">
+          Em 3 anos, queremos ser o <strong style="color: var(--accent-soft);">padrão brasileiro de acessibilidade escolar</strong> — começando aqui, no Piauí.
+        </p>
+
+        <div class="vision-cta">
+          <span>Vamos começar a construir esse mundo?</span>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Obrigado. Conecta Inclusão · 2026</span>
+        <span>10/10</span>
+      </div>
+    </section>
+  </div>
+
+  <div class="nav-controls">
+    <button class="nav-btn" id="prev" aria-label="Slide anterior">←</button>
+    <div class="nav-counter" id="counter">1 / 10</div>
+    <button class="nav-btn" id="next" aria-label="Próximo slide">→</button>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    let current = 0;
+
+    const progress = document.getElementById('progress');
+    const counter = document.getElementById('counter');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+
+    function show(index) {
+      if (index < 0 || index >= total) return;
+      slides.forEach((s, i) => {
+        s.classList.remove('active', 'previous');
+        if (i === index) s.classList.add('active');
+        if (i < index) s.classList.add('previous');
+      });
+      current = index;
+      progress.style.width = ((current + 1) / total * 100) + '%';
+      counter.textContent = `${current + 1} / ${total}`;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === total - 1;
+      // Atualiza URL (deep link)
+      history.replaceState(null, '', '#slide-' + (current + 1));
+    }
+
+    function next() { show(Math.min(current + 1, total - 1)); }
+    function prev() { show(Math.max(current - 1, 0)); }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+      else if (e.key === 'Home') { show(0); }
+      else if (e.key === 'End') { show(total - 1); }
+      else if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+      }
+      else if (e.key >= '1' && e.key <= '9') { show(parseInt(e.key) - 1); }
+      else if (e.key === '0') { show(9); } // slide 10
+    });
+
+    nextBtn.addEventListener('click', next);
+    prevBtn.addEventListener('click', prev);
+
+    // Swipe touch para mobile
+    let touchStart = 0;
+    document.addEventListener('touchstart', (e) => { touchStart = e.changedTouches[0].screenX; });
+    document.addEventListener('touchend', (e) => {
+      const diff = touchStart - e.changedTouches[0].screenX;
+      if (Math.abs(diff) > 50) (diff > 0 ? next : prev)();
+    });
+
+    // Suporte a deep link via hash
+    if (location.hash.startsWith('#slide-')) {
+      const n = parseInt(location.hash.replace('#slide-', '')) - 1;
+      if (n >= 0 && n < total) setTimeout(() => show(n), 100);
+    }
+
+    // Inicialização
+    show(0);
+  </script>
+</body>
+</html>

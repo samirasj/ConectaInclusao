@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConectaInclusao - Aluno Cego</title>
+  <link rel="stylesheet" href="/css/base.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+</head>
+<body>
+  <main class="container" role="main">
+    <header class="page-header">
+      <h1>Aluno Cego</h1>
+      <a class="back-link" href="/">Voltar</a>
+    </header>
+
+    <section id="secao-entrar" class="card" aria-label="Entrar na sala">
+      <form id="form-entrar" class="form-entrada">
+        <label for="codigo">Código da sala (6 caracteres)</label>
+        <input
+          type="text"
+          id="codigo"
+          name="codigo"
+          class="input-codigo"
+          maxlength="6"
+          minlength="6"
+          autocomplete="off"
+          required
+          aria-describedby="codigo-ajuda" />
+        <span id="codigo-ajuda" class="codigo-sala__label">Peça o código ao seu professor</span>
+        <button type="submit" class="btn btn--bloco">Entrar na sala</button>
+      </form>
+    </section>
+
+    <section id="secao-aula" class="card hidden" aria-label="Conteúdo da aula">
+      <p id="status-aula" class="codigo-sala__label" role="status" aria-live="polite">
+        Aguardando o professor...
+      </p>
+
+      <div
+        id="legenda"
+        class="legenda legenda--vazia"
+        role="region"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-label="Fala do professor">
+        Aguardando o professor falar.
+      </div>
+
+      <div id="container-imagem" class="container-imagem-cego" aria-hidden="true"></div>
+
+      <div
+        id="descricao-imagem"
+        class="descricao-imagem hidden"
+        role="region"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-label="Audiodescrição da imagem"></div>
+
+      <section
+        id="controles-tts"
+        class="controles-tts"
+        aria-label="Controles de áudio">
+        <button type="button" id="btn-repetir" class="btn btn--bloco">
+          🔁 Repetir última fala
+        </button>
+        <button type="button" id="btn-pausar-tts" class="btn">
+          ⏸ Pausar voz
+        </button>
+        <button type="button" id="btn-retomar-tts" class="btn" disabled>
+          ▶ Retomar voz
+        </button>
+
+        <div class="controles-tts__config">
+          <label for="velocidade-tts">
+            Velocidade da voz: <span id="valor-velocidade">1.0</span>x
+          </label>
+          <input
+            type="range"
+            id="velocidade-tts"
+            min="0.7"
+            max="1.5"
+            step="0.1"
+            value="1"
+            aria-describedby="velocidade-ajuda" />
+          <span id="velocidade-ajuda" class="codigo-sala__label">
+            Use as setas para ajustar
+          </span>
+        </div>
+      </section>
+    </section>
+
+    <div id="aviso" class="aviso hidden" role="status" aria-live="assertive"></div>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/aluno-cego.js"></script>
+</body>
+</html>

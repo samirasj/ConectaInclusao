@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Conecta Inclusão — Plataforma multimodal de acessibilidade para escolas públicas. Libras, audiodescrição e simplificação textual em tempo real." />
+  <title>Conecta Inclusão — MVP</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+       ============================================================ */
+    :root {
+      --color-bg: #FDF8EE;
+      --color-surface: #FFFFFF;
+      --color-surface-alt: #F4ECDC;
+      --color-ink: #1A1F2E;
+      --color-ink-soft: #4A5266;
+      --color-ink-mute: #8089A0;
+      --color-border: #E5DCC6;
+      --color-primary: #0F4C5C;
+      --color-primary-soft: #1B6E81;
+      --color-primary-tint: #E0EEF1;
+      --color-accent: #E36414;
+      --color-accent-soft: #FB8B24;
+      --color-accent-tint: #FCE6D2;
+      --color-success: #2E7D5B;
+      --color-danger: #C03A2B;
+      --color-warning: #C48A12;
+
+      --font-sans: 'Lexend', system-ui, sans-serif;
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+
+      --fs-xs: 0.8125rem;
+      --fs-sm: 0.9375rem;
+      --fs-base: 1rem;
+      --fs-md: 1.125rem;
+      --fs-lg: 1.375rem;
+      --fs-xl: 1.75rem;
+      --fs-2xl: 2.25rem;
+      --fs-3xl: 3rem;
+
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.5rem;
+      --space-6: 2rem;
+      --space-7: 3rem;
+      --space-8: 4rem;
+
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-pill: 999px;
+      --shadow-sm: 0 1px 3px rgba(26, 31, 46, 0.06);
+      --shadow-md: 0 4px 16px rgba(26, 31, 46, 0.08);
+      --shadow-lg: 0 12px 32px rgba(26, 31, 46, 0.12);
+      --line-h: 1.6;
+      --transition: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    :root.theme-high-contrast {
+      --color-bg: #000000;
+      --color-surface: #000000;
+      --color-surface-alt: #0A0A0A;
+      --color-ink: #FFFF00;
+      --color-ink-soft: #FFFF00;
+      --color-ink-mute: #DDDDDD;
+      --color-border: #FFFF00;
+      --color-primary: #FFFF00;
+      --color-primary-soft: #FFFFFF;
+      --color-primary-tint: #1A1A00;
+      --color-accent: #FFFFFF;
+      --color-accent-soft: #FFFFFF;
+      --color-accent-tint: #1A1A00;
+    }
+
+    :root.theme-dark {
+      --color-bg: #14171F;
+      --color-surface: #1C2030;
+      --color-surface-alt: #232737;
+      --color-ink: #F4ECDC;
+      --color-ink-soft: #C9C1AF;
+      --color-ink-mute: #8089A0;
+      --color-border: #2E3346;
+      --color-primary: #5FB3C6;
+      --color-primary-soft: #7FCAD9;
+      --color-primary-tint: #1E3A42;
+      --color-accent: #FB8B24;
+      --color-accent-soft: #FFA75A;
+      --color-accent-tint: #3A2410;
+    }
+
+    :root.font-large { --fs-base: 1.1875rem; --fs-md: 1.3125rem; --fs-lg: 1.625rem; --fs-xl: 2rem; --fs-2xl: 2.625rem; --fs-3xl: 3.5rem; }
+    :root.font-xl    { --fs-base: 1.375rem;  --fs-md: 1.5625rem; --fs-lg: 1.9375rem; --fs-xl: 2.5rem; --fs-2xl: 3.125rem; --fs-3xl: 4rem; }
+    :root.spacing-relaxed { --line-h: 1.8; }
+    :root.spacing-loose   { --line-h: 2.0; }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-size: 16px; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      font-size: var(--fs-base);
+      line-height: var(--line-h);
+      color: var(--color-ink);
+      background: var(--color-bg);
+      -webkit-font-smoothing: antialiased;
+      transition: background var(--transition), color var(--transition);
+    }
+    h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; margin: 0; }
+    h1 { font-size: var(--fs-3xl); letter-spacing: -0.02em; }
+    h2 { font-size: var(--fs-2xl); letter-spacing: -0.01em; }
+    h3 { font-size: var(--fs-xl); }
+    p { margin: 0; }
+    button { font-family: inherit; cursor: pointer; }
+    a { color: var(--color-primary); }
+
+    :focus-visible { outline: 3px solid var(--color-accent); outline-offset: 3px; border-radius: 4px; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+    .skip-link {
+      position: absolute; top: -100px; left: var(--space-4);
+      background: var(--color-accent); color: white;
+      padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
+      font-weight: 600; z-index: 1000;
+    }
+    .skip-link:focus { top: var(--space-4); }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+
+    .app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+    .container { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 var(--space-5); }
+
+    .app-header {
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-surface);
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(8px);
+    }
+    .header-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-4) 0;
+    }
+    .logo {
+      display: flex; align-items: center; gap: var(--space-3);
+      font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg);
+      text-decoration: none; color: var(--color-ink);
+    }
+    .logo-mark {
+      width: 40px; height: 40px;
+      background: var(--color-primary); color: white;
+      border-radius: 12px; display: grid; place-items: center;
+      font-weight: 700; box-shadow: var(--shadow-sm);
+    }
+    .header-actions { display: flex; gap: var(--space-2); align-items: center; }
+    .a11y-btn {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      background: var(--color-primary-tint); color: var(--color-primary);
+      border: 1px solid transparent; border-radius: var(--radius-pill);
+      font-weight: 600; font-size: var(--fs-sm); transition: var(--transition);
+    }
+    .a11y-btn:hover { background: var(--color-primary); color: white; }
+
+    /* BOTÕES */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+      padding: var(--space-3) var(--space-5);
+      font-size: var(--fs-base); font-weight: 600;
+      border-radius: var(--radius-md); border: 1px solid transparent;
+      text-decoration: none; transition: var(--transition); min-height: 48px;
+    }
+    .btn-primary { background: var(--color-primary); color: white; }
+    .btn-primary:hover { background: var(--color-primary-soft); transform: translateY(-1px); }
+    .btn-accent { background: var(--color-accent); color: white; }
+    .btn-accent:hover { background: var(--color-accent-soft); transform: translateY(-1px); }
+    .btn-ghost { background: transparent; color: var(--color-ink); border-color: var(--color-border); }
+    .btn-ghost:hover { background: var(--color-surface-alt); }
+    .btn-lg { padding: var(--space-4) var(--space-6); font-size: var(--fs-md); min-height: 60px; }
+    .btn-block { width: 100%; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      transition: var(--transition);
+    }
+
+    /* HOME */
+    .hero {
+      padding: var(--space-8) 0 var(--space-7); text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(circle at 20% 20%, var(--color-primary-tint) 0%, transparent 40%),
+        radial-gradient(circle at 80% 60%, var(--color-accent-tint) 0%, transparent 40%);
+      opacity: 0.6; z-index: 0;
+    }
+    .hero-inner { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; }
+    .hero h1 { margin-bottom: var(--space-4); }
+    .hero .tagline { font-size: var(--fs-md); color: var(--color-ink-soft); max-width: 580px; margin: 0 auto var(--space-6); }
+    .hero-eyebrow {
+      display: inline-block; padding: var(--space-1) var(--space-4);
+      background: var(--color-accent-tint); color: var(--color-accent);
+      border-radius: var(--radius-pill); font-size: var(--fs-xs);
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: var(--space-5);
+    }
+    .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-5); padding-bottom: var(--space-8); }
+    .profile-card {
+      text-align: left; background: var(--color-surface);
+      border: 2px solid var(--color-border); border-radius: var(--radius-lg);
+      padding: var(--space-6); cursor: pointer; transition: var(--transition);
+      display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3);
+      text-decoration: none; color: inherit;
+    }
+    .profile-card:hover, .profile-card:focus-visible { transform: translateY(-4px); border-color: var(--color-primary); box-shadow: var(--shadow-lg); }
+    .profile-icon {
+      width: 56px; height: 56px; border-radius: 16px;
+      background: var(--color-primary-tint); color: var(--color-primary);
+      display: grid; place-items: center; font-size: 28px;
+    }
+    .profile-card[data-profile="cego"] .profile-icon,
+    .profile-card[data-profile="baixa-visao"] .profile-icon { background: var(--color-accent-tint); color: var(--color-accent); }
+    .profile-card[data-profile="professor"] .profile-icon { background: var(--color-surface-alt); color: var(--color-ink); }
+    .profile-card h3 { font-family: var(--font-display); font-size: var(--fs-lg); }
+    .profile-card p { color: var(--color-ink-soft); font-size: var(--fs-sm); }
+    .disclaimer {
+      background: var(--color-primary-tint); border-left: 4px solid var(--color-primary);
+      padding: var(--space-4) var(--space-5); border-radius: var(--radius-md);
+      margin-bottom: var(--space-6); font-size: var(--fs-sm); color: var(--color-ink-soft);
+    }
+    .disclaimer strong { color: var(--color-primary); }
+
+    /* PROFESSOR */
+    .pane-header { display: flex; flex-wrap: wrap; gap: var(--space-4); justify-content: space-between; align-items: center; padding: var(--space-6) 0 var(--space-5); }
+    .pane-title { display: flex; align-items: center; gap: var(--space-3); }
+    .pane-title .badge {
+      padding: var(--space-1) var(--space-3);
+      background: var(--color-surface-alt); color: var(--color-ink-soft);
+      border-radius: var(--radius-pill); font-size: var(--fs-xs);
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .professor-grid { display: grid; grid-template-columns: 1fr 340px; gap: var(--space-5); margin-bottom: var(--space-7); }
+    @media (max-width: 920px) { .professor-grid { grid-template-columns: 1fr; } }
+
+    .mic-card { display: flex; gap: var(--space-5); align-items: center; padding: var(--space-5); }
+    .mic-visual {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: var(--color-surface-alt);
+      display: grid; place-items: center; flex-shrink: 0;
+      transition: var(--transition);
+    }
+    .mic-visual.active { background: var(--color-accent); color: white; animation: pulse-mic 1.8s ease-in-out infinite; }
+    @keyframes pulse-mic {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(227, 100, 20, 0.4); }
+      50% { box-shadow: 0 0 0 20px rgba(227, 100, 20, 0); }
+    }
+    .mic-icon { font-size: 36px; }
+    .mic-status { flex: 1; min-width: 0; }
+    .mic-status .label { font-weight: 600; font-size: var(--fs-md); margin-bottom: var(--space-1); }
+    .mic-status .hint { color: var(--color-ink-soft); font-size: var(--fs-sm); }
+
+    .transcript-area {
+      min-height: 280px; max-height: 420px; overflow-y: auto;
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+      font-size: var(--fs-md); line-height: var(--line-h);
+    }
+    .transcript-line { padding: var(--space-3) 0; border-bottom: 1px dashed var(--color-border); }
+    .transcript-line:last-child { border-bottom: none; }
+    .transcript-line .time { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-ink-mute); margin-right: var(--space-3); }
+    .transcript-interim { color: var(--color-ink-mute); font-style: italic; }
+    .transcript-empty { color: var(--color-ink-mute); text-align: center; padding: var(--space-7) var(--space-5); }
+
+    .sidebar-stack { display: flex; flex-direction: column; gap: var(--space-4); }
+    .info-tile {
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); padding: var(--space-4) var(--space-5);
+    }
+    .info-tile .label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-ink-mute); font-weight: 600; margin-bottom: var(--space-2); }
+    .info-tile .value { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 600; color: var(--color-ink); }
+
+    .upload-area {
+      border: 2px dashed var(--color-border); border-radius: var(--radius-md);
+      padding: var(--space-5); text-align: center; color: var(--color-ink-soft);
+      cursor: pointer; transition: var(--transition); background: var(--color-surface);
+    }
+    .upload-area:hover { border-color: var(--color-primary); background: var(--color-primary-tint); }
+    .upload-area input[type="file"] { display: none; }
+    .upload-area .icon { font-size: 32px; margin-bottom: var(--space-2); display: block; }
+    .image-preview { margin-top: var(--space-3); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border); }
+    .image-preview img { width: 100%; height: auto; display: block; }
+    .image-description {
+      padding: var(--space-4); background: var(--color-accent-tint);
+      color: var(--color-ink); font-size: var(--fs-sm);
+      border-top: 1px solid var(--color-border);
+    }
+    .image-description strong { color: var(--color-accent); display: block; margin-bottom: var(--space-1); }
+
+    /* ============================================================
+       ALUNO SURDO — COM AVATAR 3D EM DESTAQUE
+       ============================================================ */
+    .student-deaf-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto 1fr auto;
+      gap: var(--space-4);
+      padding: var(--space-4) 0 var(--space-7);
+      min-height: 75vh;
+    }
+    @media (max-width: 920px) {
+      .student-deaf-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+      }
+    }
+
+    /* Área do Avatar 3D — ocupa metade esquerda, máximo destaque */
+    .avatar-stage {
+      grid-row: 1 / 4;
+      background: linear-gradient(160deg, #062029 0%, #0F4C5C 40%, #1B6E81 100%);
+      border-radius: var(--radius-lg);
+      position: relative;
+      overflow: hidden;
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (max-width: 920px) {
+      .avatar-stage { grid-row: auto; min-height: 400px; }
+    }
+
+    .avatar-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: var(--space-4) var(--space-5);
+      z-index: 2;
+    }
+    .avatar-header .label {
+      font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.12em;
+      font-weight: 700; color: rgba(255, 255, 255, 0.7);
+    }
+    .avatar-status {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-pill);
+      font-size: var(--fs-xs); font-weight: 600;
+    }
+    .avatar-status.idle { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); }
+    .avatar-status.translating { background: var(--color-accent); color: white; animation: pulse-status 1.5s ease-in-out infinite; }
+    .avatar-status.ready { background: var(--color-success); color: white; }
+    .avatar-status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: currentColor;
+    }
+    @keyframes pulse-status {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Container do VLibras — posição absoluta, centrando o avatar no palco */
+    .avatar-vlibras-container {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    /* Placeholder quando VLibras não carregou */
+    .avatar-fallback {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.8);
+      max-width: 320px;
+    }
+    .avatar-fallback-icon {
+      width: 140px; height: 140px; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      display: grid; place-items: center;
+      margin: 0 auto var(--space-4);
+      font-size: 72px;
+    }
+    .avatar-fallback h3 { color: white; font-family: var(--font-display); margin-bottom: var(--space-3); }
+    .avatar-fallback p { font-size: var(--fs-sm); line-height: 1.5; opacity: 0.8; }
+
+    /* Texto sendo traduzido (faixa na base do palco) */
+    .avatar-current-text {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      padding: var(--space-3) var(--space-5);
+      color: white;
+      font-size: var(--fs-md);
+      font-weight: 500;
+      z-index: 2;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .avatar-current-text .badge-translating {
+      background: var(--color-accent);
+      color: white;
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-pill);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      flex-shrink: 0;
+    }
+    .avatar-current-text .text-content {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .avatar-current-text.empty { color: rgba(255,255,255,0.4); font-style: italic; font-weight: 400; }
+
+    /* Fila de tradução */
+    .translation-queue {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-5);
+    }
+    .translation-queue .label {
+      font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--color-ink-mute); font-weight: 700; margin-bottom: var(--space-3);
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+    .queue-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-2); max-height: 180px; overflow-y: auto; }
+    .queue-item {
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-sm);
+      font-size: var(--fs-sm);
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+    .queue-item.done { background: rgba(46, 125, 91, 0.08); color: var(--color-ink-soft); }
+    .queue-item.done::before { content: '✓'; color: var(--color-success); font-weight: 700; }
+    .queue-item.active { background: var(--color-accent-tint); color: var(--color-ink); font-weight: 600; }
+    .queue-item.active::before { content: '🤟'; }
+    .queue-item.pending { background: var(--color-surface-alt); color: var(--color-ink-mute); }
+    .queue-item.pending::before { content: '⏳'; }
+
+    /* Legendas (coluna direita) */
+    .caption-board {
+      background: var(--color-ink); color: white;
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      display: flex; flex-direction: column;
+      font-size: var(--fs-lg); line-height: 1.5;
+    }
+    :root.theme-high-contrast .caption-board { background: #000000; color: var(--color-ink); border: 2px solid var(--color-ink); }
+    .caption-board .label {
+      font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.6); font-weight: 600; margin-bottom: var(--space-3);
+    }
+    :root.theme-high-contrast .caption-board .label { color: var(--color-ink); }
+    .caption-text { flex: 1; font-size: var(--fs-xl); overflow-y: auto; max-height: 320px; }
+    .caption-text p { margin-bottom: var(--space-4); }
+    .caption-interim { color: rgba(255, 255, 255, 0.6); font-style: italic; }
+
+    /* ALUNO CEGO */
+    .student-blind { display: grid; grid-template-columns: 1fr; gap: var(--space-5); padding: var(--space-5) 0; }
+    .audio-stage {
+      background: var(--color-surface); border: 2px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: var(--space-7); text-align: center;
+    }
+    .audio-pulse {
+      width: 140px; height: 140px; border-radius: 50%;
+      background: var(--color-primary-tint); color: var(--color-primary);
+      margin: 0 auto var(--space-5); display: grid; place-items: center;
+      font-size: 70px; transition: var(--transition);
+    }
+    .audio-pulse.active { background: var(--color-accent); color: white; animation: pulse-mic 1.6s ease-in-out infinite; }
+    .audio-stage h2 { font-size: var(--fs-2xl); margin-bottom: var(--space-3); }
+    .audio-stage .description { font-size: var(--fs-md); color: var(--color-ink-soft); max-width: 540px; margin: 0 auto var(--space-5); }
+    .audio-buttons { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center; }
+
+    .recent-narrations {
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+    }
+    .recent-narrations h3 { font-size: var(--fs-lg); margin-bottom: var(--space-4); font-family: var(--font-display); }
+    .narration-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+    .narration-item {
+      padding: var(--space-3) var(--space-4); background: var(--color-surface-alt);
+      border-left: 4px solid var(--color-primary); border-radius: var(--radius-sm);
+      display: flex; justify-content: space-between; gap: var(--space-3);
+      align-items: flex-start; font-size: var(--fs-sm);
+    }
+    .narration-item.is-image { border-left-color: var(--color-accent); }
+    .narration-item button {
+      background: transparent; border: 1px solid var(--color-border);
+      padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm);
+      font-size: var(--fs-xs); flex-shrink: 0;
+    }
+    .narration-item button:hover { background: var(--color-surface); }
+
+    /* MODAL ACESSIBILIDADE */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(26, 31, 46, 0.5);
+      display: none; align-items: center; justify-content: center;
+      z-index: 100; padding: var(--space-4);
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--color-surface); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg); max-width: 640px; width: 100%;
+      max-height: 90vh; overflow-y: auto; padding: var(--space-6);
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); }
+    .modal-header h2 { font-size: var(--fs-xl); font-family: var(--font-display); }
+    .modal-close { background: transparent; border: none; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; }
+    .modal-close:hover { background: var(--color-surface-alt); }
+    .modal-section { margin-bottom: var(--space-5); }
+    .modal-section > .section-title { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-ink-mute); font-weight: 700; margin-bottom: var(--space-3); }
+    .option-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--space-2); }
+    .option-pill {
+      padding: var(--space-3); text-align: center;
+      background: var(--color-surface); border: 2px solid var(--color-border);
+      border-radius: var(--radius-md); font-size: var(--fs-sm);
+      font-weight: 500; cursor: pointer; transition: var(--transition);
+    }
+    .option-pill:hover { border-color: var(--color-primary-soft); }
+    .option-pill.active { background: var(--color-primary-tint); border-color: var(--color-primary); color: var(--color-primary); font-weight: 600; }
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; }
+    .toggle-row .label { font-weight: 500; }
+    .toggle-row .desc { font-size: var(--fs-sm); color: var(--color-ink-soft); margin-top: var(--space-1); }
+    .toggle-switch {
+      position: relative; width: 56px; height: 32px;
+      background: var(--color-border); border-radius: 32px;
+      border: none; padding: 0; cursor: pointer; transition: var(--transition);
+    }
+    .toggle-switch::after {
+      content: ''; position: absolute; top: 4px; left: 4px;
+      width: 24px; height: 24px; background: white;
+      border-radius: 50%; transition: var(--transition);
+    }
+    .toggle-switch.on { background: var(--color-primary); }
+    .toggle-switch.on::after { transform: translateX(24px); }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      color: var(--color-ink-soft); text-decoration: none;
+      font-size: var(--fs-sm); padding: var(--space-2) 0;
+    }
+    .back-link:hover { color: var(--color-primary); }
+
+    .app-footer {
+      margin-top: auto; padding: var(--space-6) 0;
+      border-top: 1px solid var(--color-border);
+      background: var(--color-surface); color: var(--color-ink-soft); font-size: var(--fs-sm);
+    }
+    .footer-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3); }
+
+    .toast {
+      position: fixed; bottom: var(--space-5); right: var(--space-5);
+      background: var(--color-ink); color: white;
+      padding: var(--space-3) var(--space-5); border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg); z-index: 200; max-width: 380px; font-size: var(--fs-sm);
+    }
+    .toast.danger { background: var(--color-danger); }
+    .toast.warning { background: var(--color-warning); color: var(--color-ink); }
+    .toast.success { background: var(--color-success); }
+
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* VLibras Widget — reposicionar quando estiver no modo Avatar Destaque */
+    [vw] { z-index: 1000 !important; }
+    body.vlibras-embedded [vw] .active { display: none !important; }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Pular para o conteúdo principal</a>
+
+  <!-- Widget VLibras (oficial do Governo Federal) -->
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <header class="app-header" role="banner">
+      <div class="container">
+        <div class="header-row">
+          <a href="#" class="logo" onclick="navigate('home'); return false;" aria-label="Conecta Inclusão — voltar à tela inicial">
+            <span class="logo-mark" aria-hidden="true">CI</span>
+            <span>Conecta Inclusão</span>
+          </a>
+          <div class="header-actions">
+            <button class="a11y-btn" onclick="openA11yModal()" aria-label="Abrir configurações de acessibilidade">
+              <span aria-hidden="true">⚙</span>
+              <span>Acessibilidade</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <div class="container">
+        <div id="view-root"></div>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <div class="container">
+        <div class="footer-row">
+          <p>MVP Conecta Inclusão · CETI Prof. Ubiraci Carvalho · São João da Serra/PI</p>
+          <p>Avatar 3D: VLibras (Governo Federal) · Áudio e legendas: Web Speech API · IA: Claude</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal de Acessibilidade -->
+  <div class="modal-backdrop" id="a11y-modal" role="dialog" aria-modal="true" aria-labelledby="a11y-modal-title" onclick="if(event.target===this) closeA11yModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="a11y-modal-title">Acessibilidade</h2>
+        <button class="modal-close" onclick="closeA11yModal()" aria-label="Fechar configurações">×</button>
+      </div>
+      <div class="modal-section">
+        <div class="section-title">Tema visual</div>
+        <div class="option-grid" role="radiogroup" aria-label="Tema visual">
+          <button class="option-pill" role="radio" data-theme="default" onclick="setTheme('default')">Padrão</button>
+          <button class="option-pill" role="radio" data-theme="dark" onclick="setTheme('dark')">Escuro</button>
+          <button class="option-pill" role="radio" data-theme="high-contrast" onclick="setTheme('high-contrast')">Alto contraste</button>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="section-title">Tamanho da fonte</div>
+        <div class="option-grid" role="radiogroup" aria-label="Tamanho da fonte">
+          <button class="option-pill" role="radio" data-font="base" onclick="setFontSize('base')">Normal</button>
+          <button class="option-pill" role="radio" data-font="large" onclick="setFontSize('large')">Grande</button>
+          <button class="option-pill" role="radio" data-font="xl" onclick="setFontSize('xl')">Muito grande</button>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="section-title">Espaçamento de linhas</div>
+        <div class="option-grid" role="radiogroup" aria-label="Espaçamento de linhas">
+          <button class="option-pill" role="radio" data-spacing="normal" onclick="setSpacing('normal')">Normal</button>
+          <button class="option-pill" role="radio" data-spacing="relaxed" onclick="setSpacing('relaxed')">Confortável</button>
+          <button class="option-pill" role="radio" data-spacing="loose" onclick="setSpacing('loose')">Amplo</button>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="section-title">IA adaptativa</div>
+        <div class="toggle-row">
+          <div>
+            <div class="label">Simplificar texto automaticamente</div>
+            <div class="desc">Reescreve descrições e textos longos em português claro.</div>
+          </div>
+          <button class="toggle-switch" id="toggle-simplify" onclick="toggleSetting('simplifyText')" role="switch" aria-checked="false" aria-label="Simplificar texto"></button>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="label">Narrar tudo em voz alta</div>
+            <div class="desc">Lê descrições, legendas e mensagens automaticamente (Aluno Cego).</div>
+          </div>
+          <button class="toggle-switch" id="toggle-autonarrate" onclick="toggleSetting('autoNarrate')" role="switch" aria-checked="false" aria-label="Narrar tudo automaticamente"></button>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-6);">
+        <button class="btn btn-primary" onclick="closeA11yModal()">Salvar e fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script VLibras Widget -->
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    let vlibrasReady = false;
+    let vlibrasWidget = null;
+    try {
+      vlibrasWidget = new window.VLibras.Widget('https://vlibras.gov.br/app');
+      // VLibras precisa de uns segundos pra carregar o avatar
+      setTimeout(() => {
+        vlibrasReady = true;
+        console.log('VLibras Widget: pronto.');
+        if (state.view === 'aluno-surdo') render();
+      }, 4000);
+    } catch (e) {
+      console.warn('VLibras não carregou:', e);
+    }
+  </script>
+
+  <!-- ============================================================
+       LÓGICA DA APLICAÇÃO
+       ============================================================ -->
+  <script>
+    'use strict';
+
+    // ================================================================
+    // ESTADO GLOBAL
+    // ================================================================
+    const state = {
+      view: 'home',
+      profile: null,
+      settings: {
+        theme: 'default',
+        fontSize: 'base',
+        spacing: 'normal',
+        simplifyText: false,
+        autoNarrate: true,
+      },
+      lesson: {
+        recording: false,
+        finalTranscript: [],
+        interim: '',
+        images: [],
+        narrations: [],
+      },
+      // AVATAR 3D: estado da fila de tradução
+      avatar: {
+        queue: [],          // [{text, status: 'pending'|'translating'|'done', ts}]
+        currentText: '',    // texto sendo traduzido agora
+        isTranslating: false,
+      },
+      recognition: null,
+      sttSupported: false,
+    };
+
+    // ================================================================
+    // AVATAR 3D — SISTEMA DE TRADUÇÃO AUTOMÁTICA EM LIBRAS
+    // ================================================================
+
+    /**
+     * Envia texto para o avatar VLibras traduzir automaticamente.
+     * O VLibras expõe a função através do widget — quando o plugin
+     * é carregado, ele injeta um player acessível na página.
+     * 
+     * A estratégia: usamos o método nativo do widget para enviar
+     * texto ao avatar. Se o widget não carregou, fazemos fallback
+     * mostrando o texto na tela para tradução manual.
+     */
+    function sendToAvatar(text) {
+      if (!text || text.trim().length === 0) return;
+      
+      const entry = {
+        text: text.trim(),
+        status: 'pending',
+        ts: Date.now(),
+      };
+      state.avatar.queue.push(entry);
+      
+      // Limita fila a 20 itens
+      if (state.avatar.queue.length > 20) {
+        state.avatar.queue = state.avatar.queue.slice(-20);
+      }
+      
+      processAvatarQueue();
+    }
+
+    function processAvatarQueue() {
+      if (state.avatar.isTranslating) return;
+      
+      const next = state.avatar.queue.find(q => q.status === 'pending');
+      if (!next) return;
+      
+      next.status = 'translating';
+      state.avatar.isTranslating = true;
+      state.avatar.currentText = next.text;
+      
+      // Atualiza UI
+      updateAvatarDisplay();
+      
+      // Envia pro VLibras via API do widget
+      if (vlibrasReady) {
+        try {
+          // O VLibras widget expõe a tradução via o access button
+          // Método 1: Injetar texto no elemento e disparar tradução
+          const playerWrapper = document.querySelector('.vw-plugin-top-wrapper');
+          if (playerWrapper) {
+            // O VLibras procura por texto selecionado ou por elementos
+            // Usamos a API interna do widget
+            const textArea = document.querySelector('[vw-text-target]');
+            if (textArea) {
+              textArea.textContent = next.text;
+            }
+          }
+          
+          // Método 2 (principal): usar a API global do VLibras
+          // O widget expõe window.vlibras ou interfaces similares
+          if (window.VLibras && window.VLibras.Widget) {
+            // Tenta enviar via o método translate do widget
+            const wrapper = document.querySelector('[vw-plugin-wrapper]');
+            if (wrapper) {
+              // Cria um span temporário com o texto e força o VLibras a ler
+              let tempSpan = document.getElementById('vlibras-auto-text');
+              if (!tempSpan) {
+                tempSpan = document.createElement('span');
+                tempSpan.id = 'vlibras-auto-text';
+                tempSpan.setAttribute('vw-text', '');
+                tempSpan.style.position = 'absolute';
+                tempSpan.style.left = '-9999px';
+                document.body.appendChild(tempSpan);
+              }
+              tempSpan.textContent = next.text;
+              
+              // Dispara evento de clique no botão do VLibras e depois no texto
+              const accessButton = document.querySelector('[vw-access-button]');
+              if (accessButton) {
+                // Garante que o widget está aberto
+                if (!accessButton.classList.contains('active')) {
+                  accessButton.click();
+                }
+                // Usa a API de seleção do texto para traduzir
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(tempSpan);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                
+                // Dispara o evento que o VLibras escuta
+                document.dispatchEvent(new Event('vlibras-translate'));
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('Erro ao enviar para VLibras:', err);
+        }
+      }
+      
+      // Timer de duração estimada (o VLibras não tem callback de fim)
+      // Estimativa: ~300ms por palavra para sinais em Libras
+      const wordCount = next.text.split(/\s+/).length;
+      const estimatedDuration = Math.max(3000, wordCount * 350);
+      
+      setTimeout(() => {
+        next.status = 'done';
+        state.avatar.isTranslating = false;
+        state.avatar.currentText = '';
+        updateAvatarDisplay();
+        // Processa próximo da fila
+        processAvatarQueue();
+      }, estimatedDuration);
+    }
+
+    function updateAvatarDisplay() {
+      if (state.view !== 'aluno-surdo') return;
+      
+      // Atualiza status do avatar
+      const statusEl = document.getElementById('avatar-status');
+      if (statusEl) {
+        if (state.avatar.isTranslating) {
+          statusEl.className = 'avatar-status translating';
+          statusEl.innerHTML = '<span class="avatar-status-dot"></span> Traduzindo';
+        } else if (state.avatar.queue.some(q => q.status === 'done')) {
+          statusEl.className = 'avatar-status ready';
+          statusEl.innerHTML = '<span class="avatar-status-dot"></span> Pronto';
+        } else {
+          statusEl.className = 'avatar-status idle';
+          statusEl.innerHTML = '<span class="avatar-status-dot"></span> Aguardando';
+        }
+      }
+      
+      // Atualiza texto sendo traduzido
+      const currentEl = document.getElementById('avatar-current-text');
+      if (currentEl) {
+        if (state.avatar.currentText) {
+          currentEl.className = 'avatar-current-text';
+          currentEl.innerHTML = `
+            <span class="badge-translating">Libras</span>
+            <span class="text-content">${escapeHtml(state.avatar.currentText)}</span>
+          `;
+        } else {
+          currentEl.className = 'avatar-current-text empty';
+          currentEl.innerHTML = 'Aguardando fala do professor…';
+        }
+      }
+      
+      // Atualiza fila
+      const queueEl = document.getElementById('translation-queue-list');
+      if (queueEl) {
+        const recentItems = state.avatar.queue.slice(-6).reverse();
+        queueEl.innerHTML = recentItems.map(item => {
+          const cls = item.status;
+          const shortText = item.text.length > 80 ? item.text.slice(0, 80) + '…' : item.text;
+          return `<li class="queue-item ${cls}"><span>${escapeHtml(shortText)}</span></li>`;
+        }).join('') || '<li style="color: var(--color-ink-mute); font-size: var(--fs-sm); padding: var(--space-2);">Nenhuma tradução ainda.</li>';
+      }
+    }
+
+    // ================================================================
+    // ROTEAMENTO
+    // ================================================================
+    function navigate(view, profile) {
+      state.view = view;
+      if (profile) state.profile = profile;
+      render();
+      document.getElementById('main').focus();
+    }
+
+    function render() {
+      const root = document.getElementById('view-root');
+      switch (state.view) {
+        case 'home': root.innerHTML = renderHome(); break;
+        case 'professor': root.innerHTML = renderProfessor(); attachProfessorHandlers(); break;
+        case 'aluno-surdo': root.innerHTML = renderAlunoSurdo(); attachStudentDeafHandlers(); break;
+        case 'aluno-cego': root.innerHTML = renderAlunoCego(); attachStudentBlindHandlers(); break;
+        default: root.innerHTML = renderHome();
+      }
+    }
+
+    // ================================================================
+    // TELA: HOME
+    // ================================================================
+    function renderHome() {
+      return `
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero-inner">
+            <span class="hero-eyebrow">MVP · Versão de demonstração</span>
+            <h1 id="hero-title">Acessibilidade em tempo real para todas as salas de aula</h1>
+            <p class="tagline">
+              Avatar 3D em Libras, audiodescrição de imagens, legendagem ao vivo e adaptação visual.
+              Tudo numa mesma plataforma, pensada para escolas públicas do Piauí.
+            </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="profile-title">
+          <h2 id="profile-title" class="sr-only">Escolha seu perfil</h2>
+          <div class="disclaimer" role="note">
+            <strong>Como usar este MVP:</strong> Escolha um perfil abaixo. Use uma aba como "Professor"
+            e outra como "Aluno Surdo" para ver o avatar 3D traduzindo em Libras automaticamente
+            conforme o professor fala.
+          </div>
+
+          <div class="profile-grid">
+            <button class="profile-card" data-profile="professor" onclick="navigate('professor', 'professor')" aria-label="Entrar como Professor">
+              <div class="profile-icon" aria-hidden="true">📘</div>
+              <h3>Professor</h3>
+              <p>Capto a fala da aula, envio imagens dos slides. Tudo é traduzido automaticamente para os alunos.</p>
+            </button>
+
+            <button class="profile-card" data-profile="surdo" onclick="navigate('aluno-surdo', 'surdo')" aria-label="Entrar como Aluno Surdo">
+              <div class="profile-icon" aria-hidden="true">🤟</div>
+              <h3>Aluno Surdo</h3>
+              <p>Vejo o avatar 3D traduzindo em Libras em tempo real, com legendas grandes e fila de tradução visível.</p>
+            </button>
+
+            <button class="profile-card" data-profile="cego" onclick="navigate('aluno-cego', 'cego')" aria-label="Entrar como Aluno Cego ou com baixa visão">
+              <div class="profile-icon" aria-hidden="true">👂</div>
+              <h3>Aluno Cego / Baixa visão</h3>
+              <p>Recebo audiodescrição de imagens, gráficos e mapas em voz natural, com comandos por voz.</p>
+            </button>
+          </div>
+        </section>
+      `;
+    }
+
+    // ================================================================
+    // TELA: PROFESSOR
+    // ================================================================
+    function renderProfessor() {
+      const recording = state.lesson.recording;
+      return `
+        <div class="pane-header">
+          <div class="pane-title">
+            <a href="#" class="back-link" onclick="navigate('home'); return false;" aria-label="Voltar">← Início</a>
+          </div>
+        </div>
+
+        <header style="margin-bottom: var(--space-5);">
+          <div class="pane-title" style="margin-bottom: var(--space-2);">
+            <h1 style="font-size: var(--fs-2xl);">Painel do Professor</h1>
+            <span class="badge">Modo simulação</span>
+          </div>
+          <p style="color: var(--color-ink-soft); max-width: 640px;">
+            Toque em "Iniciar aula" e fale normalmente. Sua fala é transcrita em tempo real e
+            <strong>enviada automaticamente para o avatar 3D de Libras</strong> e para as legendas dos alunos.
+          </p>
+        </header>
+
+        <div class="professor-grid">
+          <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <div class="card mic-card">
+              <div class="mic-visual ${recording ? 'active' : ''}" aria-hidden="true">
+                <span class="mic-icon">${recording ? '🎙' : '🎤'}</span>
+              </div>
+              <div class="mic-status">
+                <div class="label">${recording ? 'Capturando fala → Avatar 3D + Legendas' : 'Pronto para iniciar'}</div>
+                <div class="hint">
+                  ${recording
+                    ? 'Sua fala está sendo transcrita e traduzida em Libras pelo avatar automaticamente.'
+                    : state.sttSupported === false
+                      ? 'Reconhecimento de fala não suportado. Use Chrome ou Edge.'
+                      : 'Toque em "Iniciar aula" e dê permissão de microfone.'}
+                </div>
+              </div>
+              <div>
+                ${recording
+                  ? `<button class="btn btn-accent btn-lg" onclick="stopLesson()">Encerrar</button>`
+                  : `<button class="btn btn-primary btn-lg" onclick="startLesson()" ${state.sttSupported === false ? 'disabled' : ''}>Iniciar aula</button>`}
+              </div>
+            </div>
+
+            <section aria-labelledby="transcript-title">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+                <h2 id="transcript-title" style="font-size: var(--fs-lg);">Transcrição em tempo real</h2>
+                ${state.lesson.finalTranscript.length > 0
+                  ? `<button class="btn btn-ghost" onclick="clearTranscript()" style="padding: var(--space-2) var(--space-4); min-height: 38px; font-size: var(--fs-sm);">Limpar</button>`
+                  : ''}
+              </div>
+              <div class="transcript-area" id="transcript-area" aria-live="polite" aria-atomic="false">
+                ${renderTranscript()}
+              </div>
+            </section>
+          </div>
+
+          <aside class="sidebar-stack" aria-label="Status e ferramentas">
+            <div class="info-tile">
+              <div class="label">Avatar 3D Libras</div>
+              <div class="value" style="font-size: var(--fs-md);">
+                ${state.avatar.isTranslating ? '🤟 Traduzindo…' : state.lesson.recording ? '⏳ Aguardando fala' : '— Parado'}
+              </div>
+            </div>
+            <div class="info-tile">
+              <div class="label">Frases traduzidas</div>
+              <div class="value">${state.avatar.queue.filter(q => q.status === 'done').length}</div>
+            </div>
+
+            <div class="card" style="padding: var(--space-5);">
+              <div style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-ink-mute); font-weight: 600; margin-bottom: var(--space-3);">Imagem da aula</div>
+              <label class="upload-area" for="image-input" tabindex="0" role="button" aria-label="Enviar imagem">
+                <span class="icon" aria-hidden="true">📷</span>
+                <div style="font-weight: 600; color: var(--color-ink); margin-bottom: var(--space-1);">Enviar imagem</div>
+                <div style="font-size: var(--fs-sm);">Slide, foto do quadro, gráfico ou mapa</div>
+                <input type="file" id="image-input" accept="image/*" />
+              </label>
+              ${state.lesson.images.length > 0 ? renderLatestImage() : ''}
+            </div>
+          </aside>
+        </div>
+      `;
+    }
+
+    function renderTranscript() {
+      const lines = state.lesson.finalTranscript;
+      const interim = state.lesson.interim;
+      if (lines.length === 0 && !interim) {
+        return `<p class="transcript-empty">A transcrição aparecerá aqui assim que você começar a falar.<br>Cada frase é enviada automaticamente para o avatar 3D de Libras.</p>`;
+      }
+      const finalHtml = lines.map(line => `
+        <div class="transcript-line">
+          <span class="time">${formatTime(line.ts)}</span>
+          <span>${escapeHtml(line.text)}</span>
+        </div>
+      `).join('');
+      const interimHtml = interim
+        ? `<div class="transcript-line transcript-interim"><span class="time">…</span><span>${escapeHtml(interim)}</span></div>`
+        : '';
+      return finalHtml + interimHtml;
+    }
+
+    function renderLatestImage() {
+      const img = state.lesson.images[state.lesson.images.length - 1];
+      const description = img.simplified || img.description;
+      return `
+        <div class="image-preview">
+          <img src="${img.src}" alt="Imagem enviada para audiodescrição" />
+          <div class="image-description">
+            <strong>Descrição gerada</strong>
+            ${img.loading
+              ? '<span><span class="spinner"></span> Gerando descrição com IA...</span>'
+              : `<div>${escapeHtml(description || 'Sem descrição.')}</div>`}
+          </div>
+        </div>
+      `;
+    }
+
+    // ================================================================
+    // TELA: ALUNO SURDO — COM AVATAR 3D EM DESTAQUE
+    // ================================================================
+    function renderAlunoSurdo() {
+      const lastLines = state.lesson.finalTranscript.slice(-8);
+      const fullText = lastLines.map(l => l.text).join(' ');
+      const isTranslating = state.avatar.isTranslating;
+
+      return `
+        <div class="pane-header">
+          <div class="pane-title">
+            <a href="#" class="back-link" onclick="navigate('home'); return false;">← Início</a>
+          </div>
+        </div>
+
+        <header style="margin-bottom: var(--space-3);">
+          <div class="pane-title" style="margin-bottom: var(--space-2);">
+            <h1 style="font-size: var(--fs-2xl);">Visão do Aluno Surdo</h1>
+            <span class="badge">Avatar 3D + Legendas</span>
+          </div>
+          <p style="color: var(--color-ink-soft); max-width: 720px;">
+            O avatar 3D traduz automaticamente a fala do professor em Libras.
+            As legendas aparecem à direita. Tudo em tempo real.
+          </p>
+        </header>
+
+        <div class="student-deaf-layout">
+          <!-- ====== AVATAR 3D — METADE ESQUERDA (DESTAQUE) ====== -->
+          <div class="avatar-stage" aria-labelledby="avatar-title">
+            <div class="avatar-header">
+              <span class="label" id="avatar-title">Avatar 3D — Libras</span>
+              <span class="avatar-status ${isTranslating ? 'translating' : state.avatar.queue.some(q => q.status === 'done') ? 'ready' : 'idle'}" id="avatar-status">
+                <span class="avatar-status-dot"></span>
+                ${isTranslating ? 'Traduzindo' : state.avatar.queue.some(q => q.status === 'done') ? 'Pronto' : 'Aguardando'}
+              </span>
+            </div>
+
+            <div class="avatar-vlibras-container">
+              ${vlibrasReady ? `
+                <div style="text-align: center; color: rgba(255,255,255,0.9);">
+                  <div style="font-size: 100px; margin-bottom: var(--space-3);">🤟</div>
+                  <h3 style="color: white; font-family: var(--font-display); margin-bottom: var(--space-2);">Avatar VLibras Ativo</h3>
+                  <p style="font-size: var(--fs-sm); opacity: 0.8; max-width: 300px; margin: 0 auto;">
+                    O widget VLibras está traduzindo no canto da tela.
+                    Cada frase do professor é enviada automaticamente.
+                  </p>
+                  <button class="btn btn-accent" style="margin-top: var(--space-4);" onclick="openVLibrasWidget()">
+                    Abrir avatar em destaque
+                  </button>
+                </div>
+              ` : `
+                <div class="avatar-fallback">
+                  <div class="avatar-fallback-icon">🤟</div>
+                  <h3>Carregando Avatar 3D…</h3>
+                  <p>O widget VLibras está sendo carregado. Aguarde alguns segundos.
+                     Se não carregar, verifique sua conexão com a internet.</p>
+                  <p style="margin-top: var(--space-3); font-size: var(--fs-xs); opacity: 0.6;">
+                    Motor: VLibras (Governo Federal) · UFPB/LAVID
+                  </p>
+                </div>
+              `}
+            </div>
+
+            <div class="avatar-current-text ${state.avatar.currentText ? '' : 'empty'}" id="avatar-current-text">
+              ${state.avatar.currentText
+                ? `<span class="badge-translating">Libras</span><span class="text-content">${escapeHtml(state.avatar.currentText)}</span>`
+                : 'Aguardando fala do professor…'}
+            </div>
+          </div>
+
+          <!-- ====== LEGENDAS — PARTE DIREITA SUPERIOR ====== -->
+          <div class="caption-board" aria-labelledby="caption-title" aria-live="polite">
+            <div class="label" id="caption-title">Legendas ao vivo</div>
+            <div class="caption-text" id="caption-text">
+              ${fullText ? `<p>${escapeHtml(fullText)}</p>` : `<p style="color: rgba(255,255,255,0.5);">Aguardando o professor iniciar a aula…</p>`}
+              ${state.lesson.interim ? `<p class="caption-interim">${escapeHtml(state.lesson.interim)}</p>` : ''}
+            </div>
+          </div>
+
+          <!-- ====== FILA DE TRADUÇÃO — PARTE DIREITA INFERIOR ====== -->
+          <div class="translation-queue">
+            <div class="label">
+              <span>Fila de tradução em Libras</span>
+              <span style="margin-left: auto; font-variant-numeric: tabular-nums;">
+                ${state.avatar.queue.filter(q => q.status === 'done').length} traduzidas
+              </span>
+            </div>
+            <ul class="queue-list" id="translation-queue-list">
+              ${state.avatar.queue.length > 0
+                ? state.avatar.queue.slice(-6).reverse().map(item => {
+                    const shortText = item.text.length > 80 ? item.text.slice(0, 80) + '…' : item.text;
+                    return `<li class="queue-item ${item.status}"><span>${escapeHtml(shortText)}</span></li>`;
+                  }).join('')
+                : '<li style="color: var(--color-ink-mute); font-size: var(--fs-sm); padding: var(--space-2);">Nenhuma tradução ainda. Quando o professor falar, as frases aparecerão aqui.</li>'}
+            </ul>
+          </div>
+        </div>
+
+        ${state.lesson.images.length > 0 ? `
+          <section style="margin-top: var(--space-5);" aria-labelledby="images-title">
+            <h2 id="images-title" style="font-size: var(--fs-lg); margin-bottom: var(--space-4);">Imagens da aula</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4);">
+              ${state.lesson.images.map(img => `
+                <div class="card" style="padding: var(--space-4);">
+                  <img src="${img.src}" alt="${escapeHtml(img.description || 'Imagem da aula')}" style="width: 100%; border-radius: var(--radius-md); margin-bottom: var(--space-3);" />
+                  <p style="font-size: var(--fs-sm); color: var(--color-ink-soft);">${escapeHtml(img.simplified || img.description || 'Sem descrição.')}</p>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+        ` : ''}
+      `;
+    }
+
+    function openVLibrasWidget() {
+      const accessButton = document.querySelector('[vw-access-button]');
+      if (accessButton) {
+        accessButton.click();
+        showToast('Avatar VLibras aberto. O texto é enviado automaticamente.', 'success');
+      } else {
+        showToast('Widget VLibras não encontrado. Verifique a conexão.', 'warning');
+      }
+    }
+
+    // ================================================================
+    // TELA: ALUNO CEGO
+    // ================================================================
+    function renderAlunoCego() {
+      const isSpeaking = window.speechSynthesis && window.speechSynthesis.speaking;
+      return `
+        <div class="pane-header">
+          <div class="pane-title">
+            <a href="#" class="back-link" onclick="navigate('home'); return false;">← Início</a>
+          </div>
+        </div>
+
+        <header style="margin-bottom: var(--space-5);">
+          <h1 style="font-size: var(--fs-2xl); margin-bottom: var(--space-2);">Visão do Aluno Cego / Baixa visão</h1>
+          <p style="color: var(--color-ink-soft); max-width: 720px;">
+            A fala do professor é narrada em voz natural. Imagens são descritas com IA.
+          </p>
+        </header>
+
+        <div class="student-blind">
+          <div class="audio-stage" aria-labelledby="audio-title">
+            <div class="audio-pulse ${isSpeaking ? 'active' : ''}" aria-hidden="true">
+              <span>${isSpeaking ? '🔊' : '👂'}</span>
+            </div>
+            <h2 id="audio-title">${isSpeaking ? 'Narrando…' : 'Aguardando aula'}</h2>
+            <p class="description">
+              ${state.lesson.finalTranscript.length > 0
+                ? 'A última fala do professor já foi narrada. Repita ou pause abaixo.'
+                : 'Assim que o professor falar, você ouvirá em voz alta.'}
+            </p>
+            <div class="audio-buttons">
+              <button class="btn btn-primary btn-lg" onclick="readLastTranscript()" aria-label="Repetir última fala">
+                <span aria-hidden="true">🔁</span> Repetir última fala
+              </button>
+              <button class="btn btn-ghost btn-lg" onclick="stopSpeaking()" aria-label="Parar narração">
+                <span aria-hidden="true">⏸</span> Parar
+              </button>
+              <label class="btn btn-accent btn-lg" for="blind-image-input" style="cursor: pointer;">
+                <span aria-hidden="true">🖼</span> Enviar imagem para descrever
+                <input type="file" id="blind-image-input" accept="image/*" style="display: none;" />
+              </label>
+            </div>
+          </div>
+
+          <section class="recent-narrations" aria-labelledby="recent-title">
+            <h3 id="recent-title">Histórico recente</h3>
+            ${state.lesson.narrations.length === 0
+              ? `<p style="color: var(--color-ink-mute); font-size: var(--fs-sm);">Nenhuma narração ainda.</p>`
+              : `<ul class="narration-list">
+                  ${state.lesson.narrations.slice().reverse().slice(0, 10).map((n, i) => `
+                    <li class="narration-item ${n.type === 'image' ? 'is-image' : ''}">
+                      <div class="text">
+                        <strong>${n.type === 'image' ? '🖼 Imagem' : '🗣 Fala'}</strong> · <span style="color: var(--color-ink-mute);">${formatTime(n.ts)}</span>
+                        <div style="margin-top: var(--space-1);">${escapeHtml(n.text)}</div>
+                      </div>
+                      <button onclick='speak(${JSON.stringify(n.text)})' aria-label="Ouvir novamente">🔊</button>
+                    </li>
+                  `).join('')}
+                </ul>`}
+          </section>
+        </div>
+      `;
+    }
+
+    // ================================================================
+    // HANDLERS
+    // ================================================================
+    function attachProfessorHandlers() {
+      const input = document.getElementById('image-input');
+      if (input) input.addEventListener('change', handleImageUpload);
+    }
+    function attachStudentDeafHandlers() {
+      // Se VLibras carregou, abre automaticamente o widget na tela do aluno surdo
+      if (vlibrasReady) {
+        setTimeout(() => {
+          const accessButton = document.querySelector('[vw-access-button]');
+          if (accessButton && !document.querySelector('.vw-plugin-top-wrapper.active')) {
+            accessButton.click();
+          }
+        }, 500);
+      }
+    }
+    function attachStudentBlindHandlers() {
+      const input = document.getElementById('blind-image-input');
+      if (input) input.addEventListener('change', handleImageUpload);
+    }
+
+    // ================================================================
+    // STT — RECONHECIMENTO DE FALA
+    // ================================================================
+    function initSpeechRecognition() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { state.sttSupported = false; return null; }
+      state.sttSupported = true;
+      const recognition = new SR();
+      recognition.lang = 'pt-BR';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const res = event.results[i];
+          if (res.isFinal) {
+            const text = res[0].transcript.trim();
+            if (text) {
+              state.lesson.finalTranscript.push({ text, ts: Date.now() });
+              
+              // >>> ENVIO AUTOMÁTICO PARA AVATAR 3D <<<
+              sendToAvatar(text);
+              
+              // Narração para aluno cego
+              if (state.settings.autoNarrate) {
+                speak(text);
+                state.lesson.narrations.push({ type: 'speech', text, ts: Date.now() });
+              }
+            }
+          } else {
+            interim += res[0].transcript;
+          }
+        }
+        state.lesson.interim = interim;
+        updateTranscriptArea();
+      };
+
+      recognition.onerror = (event) => {
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          showToast('Permissão de microfone negada.', 'danger');
+          state.lesson.recording = false;
+          render();
+        } else if (event.error !== 'no-speech') {
+          showToast('Erro no reconhecimento: ' + event.error, 'warning');
+        }
+      };
+
+      recognition.onend = () => {
+        if (state.lesson.recording) {
+          try { recognition.start(); } catch (e) {}
+        }
+      };
+
+      return recognition;
+    }
+
+    function startLesson() {
+      if (!state.recognition) state.recognition = initSpeechRecognition();
+      if (!state.recognition) {
+        showToast('Reconhecimento de fala não disponível. Use Chrome ou Edge.', 'danger');
+        return;
+      }
+      try {
+        state.recognition.start();
+        state.lesson.recording = true;
+        render();
+        showToast('Aula iniciada. Fala → Legendas + Avatar 3D Libras.', 'success');
+      } catch (e) { console.warn(e); }
+    }
+
+    function stopLesson() {
+      if (state.recognition) {
+        state.lesson.recording = false;
+        try { state.recognition.stop(); } catch (e) {}
+      }
+      state.lesson.interim = '';
+      render();
+      showToast('Aula encerrada.');
+    }
+
+    function clearTranscript() {
+      state.lesson.finalTranscript = [];
+      state.lesson.interim = '';
+      state.avatar.queue = [];
+      state.avatar.currentText = '';
+      state.avatar.isTranslating = false;
+      render();
+    }
+
+    function updateTranscriptArea() {
+      if (state.view === 'professor') {
+        const el = document.getElementById('transcript-area');
+        if (el) { el.innerHTML = renderTranscript(); el.scrollTop = el.scrollHeight; }
+      } else if (state.view === 'aluno-surdo') {
+        const el = document.getElementById('caption-text');
+        if (el) {
+          const lastLines = state.lesson.finalTranscript.slice(-8);
+          const fullText = lastLines.map(l => l.text).join(' ');
+          el.innerHTML = `
+            ${fullText ? `<p>${escapeHtml(fullText)}</p>` : `<p style="color: rgba(255,255,255,0.5);">Aguardando o professor…</p>`}
+            ${state.lesson.interim ? `<p class="caption-interim">${escapeHtml(state.lesson.interim)}</p>` : ''}
+          `;
+          el.scrollTop = el.scrollHeight;
+        }
+        // Atualiza displays do avatar
+        updateAvatarDisplay();
+      }
+    }
+
+    // ================================================================
+    // TTS — SÍNTESE DE FALA
+    // ================================================================
+    let bestVoice = null;
+    function selectBestVoice() {
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices.length) return null;
+      const ptVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('pt'));
+      bestVoice = ptVoices.find(v => /google/i.test(v.name))
+        || ptVoices.find(v => /natural|neural/i.test(v.name))
+        || ptVoices[0]
+        || voices[0];
+      return bestVoice;
+    }
+
+    function speak(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'pt-BR';
+      utter.rate = 1.0;
+      if (!bestVoice) selectBestVoice();
+      if (bestVoice) utter.voice = bestVoice;
+      utter.onstart = () => { if (state.view === 'aluno-cego') render(); };
+      utter.onend = () => { if (state.view === 'aluno-cego') render(); };
+      window.speechSynthesis.speak(utter);
+    }
+
+    function stopSpeaking() {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      render();
+    }
+
+    function readLastTranscript() {
+      const lines = state.lesson.finalTranscript;
+      if (lines.length === 0) {
+        speak('Ainda não há nada gravado. O professor precisa começar a aula.');
+        return;
+      }
+      speak(lines[lines.length - 1].text);
+    }
+
+    // ================================================================
+    // CLAUDE API — VISÃO + SIMPLIFICAÇÃO
+    // ================================================================
+    async function describeImageWithClaude(base64Data, mediaType) {
+      const prompt = `Você é um especialista em audiodescrição educacional para alunos cegos do ensino médio brasileiro. Descreva esta imagem de forma clara, objetiva e pedagogicamente útil.
+
+Regras:
+- Se for GRÁFICO: tipo, eixos, valores principais e tendência geral.
+- Se for MAPA: região, divisões, legenda e o que mostra.
+- Se for FOTO/ILUSTRAÇÃO: o que aparece, contexto e detalhes relevantes.
+- Se for TEXTO em imagem: transcreva o principal.
+- Português brasileiro claro, frases curtas.
+- Comece direto pela descrição. Máximo 4 frases.`;
+
+      try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1000,
+            messages: [{
+              role: 'user',
+              content: [
+                { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64Data } },
+                { type: 'text', text: prompt }
+              ]
+            }]
+          })
+        });
+        if (!response.ok) throw new Error(`API ${response.status}`);
+        const data = await response.json();
+        const textBlock = data.content.find(b => b.type === 'text');
+        return textBlock ? textBlock.text.trim() : 'Não foi possível gerar a descrição.';
+      } catch (err) {
+        console.error('Erro:', err);
+        return `Não consegui descrever a imagem. (${err.message})`;
+      }
+    }
+
+    async function simplifyTextWithClaude(text) {
+      try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1000,
+            messages: [{ role: 'user', content: `Reescreva em "português claro": frases curtas, palavras comuns, voz ativa. Mantenha o conteúdo educacional. Devolva APENAS o texto.\n\nTexto:\n${text}` }]
+          })
+        });
+        if (!response.ok) return text;
+        const data = await response.json();
+        const textBlock = data.content.find(b => b.type === 'text');
+        return textBlock ? textBlock.text.trim() : text;
+      } catch { return text; }
+    }
+
+    // ================================================================
+    // UPLOAD DE IMAGEM
+    // ================================================================
+    async function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { showToast('Imagem até 5MB.', 'warning'); return; }
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const dataUrl = reader.result;
+        const base64 = dataUrl.split(',')[1];
+        const imgObj = { src: dataUrl, description: null, simplified: null, loading: true, ts: Date.now() };
+        state.lesson.images.push(imgObj);
+        render();
+        showToast('Gerando descrição…');
+
+        const description = await describeImageWithClaude(base64, file.type);
+        imgObj.description = description;
+        imgObj.loading = false;
+        if (state.settings.simplifyText) imgObj.simplified = await simplifyTextWithClaude(description);
+
+        const narrationText = imgObj.simplified || imgObj.description;
+        state.lesson.narrations.push({ type: 'image', text: narrationText, ts: Date.now() });
+        
+        // Envia descrição da imagem para o avatar Libras também
+        sendToAvatar('Descrição de imagem: ' + narrationText);
+
+        if (state.settings.autoNarrate || state.view === 'aluno-cego') {
+          speak('Nova imagem. ' + narrationText);
+        }
+        render();
+        showToast('Descrição pronta.', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ================================================================
+    // MODAL ACESSIBILIDADE
+    // ================================================================
+    function openA11yModal() { document.getElementById('a11y-modal').classList.add('open'); refreshA11yModal(); }
+    function closeA11yModal() { document.getElementById('a11y-modal').classList.remove('open'); }
+    function refreshA11yModal() {
+      document.querySelectorAll('[data-theme]').forEach(el => el.classList.toggle('active', el.dataset.theme === state.settings.theme));
+      document.querySelectorAll('[data-font]').forEach(el => el.classList.toggle('active', el.dataset.font === state.settings.fontSize));
+      document.querySelectorAll('[data-spacing]').forEach(el => el.classList.toggle('active', el.dataset.spacing === state.settings.spacing));
+      const tSimplify = document.getElementById('toggle-simplify');
+      const tNarrate = document.getElementById('toggle-autonarrate');
+      tSimplify.classList.toggle('on', state.settings.simplifyText);
+      tSimplify.setAttribute('aria-checked', state.settings.simplifyText);
+      tNarrate.classList.toggle('on', state.settings.autoNarrate);
+      tNarrate.setAttribute('aria-checked', state.settings.autoNarrate);
+    }
+    function setTheme(t) { state.settings.theme = t; applySettings(); refreshA11yModal(); }
+    function setFontSize(f) { state.settings.fontSize = f; applySettings(); refreshA11yModal(); }
+    function setSpacing(s) { state.settings.spacing = s; applySettings(); refreshA11yModal(); }
+    function toggleSetting(key) { state.settings[key] = !state.settings[key]; refreshA11yModal(); }
+
+    function applySettings() {
+      const root = document.documentElement;
+      root.classList.remove('theme-default', 'theme-dark', 'theme-high-contrast');
+      root.classList.add(`theme-${state.settings.theme}`);
+      root.classList.remove('font-base', 'font-large', 'font-xl');
+      root.classList.add(`font-${state.settings.fontSize}`);
+      root.classList.remove('spacing-normal', 'spacing-relaxed', 'spacing-loose');
+      root.classList.add(`spacing-${state.settings.spacing}`);
+    }
+
+    // ================================================================
+    // UTILITÁRIOS
+    // ================================================================
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c]));
+    }
+    function formatTime(ts) {
+      const d = new Date(ts);
+      return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+    }
+    let toastTimer;
+    function showToast(message, kind) {
+      let toast = document.getElementById('app-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'app-toast';
+        toast.className = 'toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toast);
+      }
+      toast.className = 'toast' + (kind ? ' ' + kind : '');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }
+
+    // ================================================================
+    // INIT
+    // ================================================================
+    function init() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      state.sttSupported = !!SR;
+      if (window.speechSynthesis) { selectBestVoice(); window.speechSynthesis.onvoiceschanged = selectBestVoice; }
+      applySettings();
+      render();
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeA11yModal(); });
+    }
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

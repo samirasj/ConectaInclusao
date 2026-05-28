@@ -1,0 +1,517 @@
+/* ConectaInclusao - componentes do Modulo 2 (sala em tempo real) */
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.page-header h1 {
+  color: var(--color-primary);
+  margin: 0;
+  font-size: 2rem;
+}
+
+.back-link {
+  color: var(--color-text);
+  text-decoration: underline;
+  font-size: 1rem;
+}
+
+.back-link:hover { color: var(--color-primary); }
+
+.card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+/* Codigo da sala em fonte enorme para o professor exibir */
+.codigo-sala {
+  text-align: center;
+  padding: var(--space-lg);
+}
+
+.codigo-sala__label {
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.codigo-sala__valor {
+  font-size: 6.5rem; /* ~104px */
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: 0.15em;
+  margin: 0;
+  font-family: 'Consolas', 'Courier New', monospace;
+  word-break: break-all;
+}
+
+/* Badges de contagem */
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  justify-content: center;
+  margin-top: var(--space-md);
+}
+
+.badge {
+  background-color: var(--color-bg);
+  border: 3px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  min-width: 180px;
+  text-align: center;
+}
+
+.badge__numero {
+  display: block;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.badge__rotulo {
+  display: block;
+  margin-top: var(--space-sm);
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Formulario de entrada do aluno */
+.form-entrada {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.form-entrada label {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.form-entrada input[type="text"],
+.form-aula input[type="text"],
+.form-fala textarea {
+  width: 100%;
+  font-family: var(--font-base);
+  font-size: 1.25rem;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-accent);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.input-codigo {
+  font-family: 'Consolas', 'Courier New', monospace !important;
+  font-size: 2rem !important;
+  text-align: center;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.btn {
+  display: inline-block;
+  font-family: var(--font-base);
+  font-weight: 700;
+  font-size: 1.25rem;
+  padding: var(--space-md) var(--space-lg);
+  min-height: 64px;
+  border-radius: var(--radius-md);
+  border: 3px solid transparent;
+  background-color: var(--color-primary);
+  color: var(--color-primary-text);
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+}
+
+.btn:hover { border-color: var(--color-accent); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn--bloco { width: 100%; }
+
+.btn--perigo {
+  background-color: #b00020;
+  color: #fff;
+}
+
+/* Area de legenda gigante (Modulo 2 ja exibe texto cru) */
+.legenda {
+  background-color: var(--color-bg);
+  border: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  min-height: 280px;
+  font-size: 2.25rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--color-text);
+  word-break: break-word;
+}
+
+.legenda--vazia {
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.imagem-recebida {
+  display: block;
+  max-width: 100%;
+  margin-top: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-accent);
+}
+
+.aviso {
+  background-color: var(--color-bg);
+  border: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-size: 1.1rem;
+  margin-top: var(--space-md);
+}
+
+.aviso--erro {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+.hidden { display: none !important; }
+
+.form-aula,
+.form-fala {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.form-fala textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* =================================================================
+   Modulo 3 - Captacao de fala (professor)
+   ================================================================= */
+.captacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.btn--captacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  font-size: 1.35rem;
+}
+
+.captacao__icone {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+/* Vermelho pulsante quando esta ouvindo */
+.btn--captacao-ativa {
+  background-color: #c1272d;
+  color: #fff;
+  animation: captacaoPulse 1.4s ease-in-out infinite;
+}
+
+.btn--captacao-ativa:hover { border-color: #fff; }
+
+@keyframes captacaoPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(193, 39, 45, 0.55); }
+  50%      { box-shadow: 0 0 0 14px rgba(193, 39, 45, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn--captacao-ativa { animation: none; }
+}
+
+.captacao__status {
+  font-size: 1.05rem;
+  color: var(--color-text-muted);
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  border-left: 4px solid var(--color-accent);
+  background-color: rgba(79, 195, 247, 0.08);
+  border-radius: var(--radius-md);
+}
+
+.captacao__status--ativo {
+  border-left-color: #2ecc71;
+  color: #d2f5e3;
+}
+
+.captacao__status--pausado {
+  border-left-color: var(--color-text-muted);
+}
+
+.captacao__status--reconectando {
+  border-left-color: #f39c12;
+  color: #ffe3b0;
+}
+
+.captacao__status--erro {
+  border-left-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+.captacao__previa {
+  min-height: 2.5rem;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+  padding: var(--space-sm) var(--space-md);
+  border: 2px dashed var(--color-accent);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+}
+
+.captacao__previa:empty::before {
+  content: 'Prévia em tempo real aparecerá aqui enquanto você fala.';
+  opacity: 0.6;
+}
+
+/* =================================================================
+   Modulo 3 - Aluno surdo (legenda Libras + historico)
+   ================================================================= */
+.aluno-surdo__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .aluno-surdo__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.aluno-surdo__legendas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.vlibras-player {
+  width: 340px;
+  height: 420px;
+  background-color: #0b1d2a;
+  border: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+}
+
+.vlibras-player canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.historico-falas {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.historico-falas li {
+  background-color: var(--color-bg);
+  border-left: 4px solid var(--color-text-muted);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 600px) {
+  .aluno-surdo__grid {
+    padding-right: 0;
+  }
+}
+
+/* ============================================================
+   Módulo 5 — Imagem do professor + audiodescrição
+   ============================================================ */
+
+.secao-titulo {
+  margin: 0 0 var(--space-sm) 0;
+  font-size: 1.4rem;
+  color: var(--color-text);
+}
+
+.secao-descricao {
+  margin: 0 0 var(--space-md) 0;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.form-imagem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* Input file fica oculto; o label estilizado como botão é o gatilho. */
+.input-imagem-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.btn--imagem {
+  display: inline-flex;
+  gap: var(--space-sm);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.input-imagem-oculto:focus-visible + .btn--imagem,
+.btn--imagem:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.preview-imagem-wrapper {
+  display: flex;
+  justify-content: center;
+  background-color: var(--color-bg);
+  border: 2px dashed var(--color-text-muted);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  max-height: 320px;
+  overflow: hidden;
+}
+
+#preview-imagem {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.legenda-imagem {
+  width: 100%;
+  min-height: 100px;
+  padding: var(--space-md);
+  font-size: 1.1rem;
+  line-height: 1.5;
+  font-family: inherit;
+  border: 2px solid var(--color-text-muted);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  resize: vertical;
+}
+
+.legenda-imagem:focus {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-color: var(--color-primary);
+}
+
+.botoes-imagem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.botoes-imagem .btn--bloco {
+  flex: 1 1 240px;
+}
+
+/* ============================================================
+   Aluno cego — preview de imagem + audiodescrição + controles TTS
+   ============================================================ */
+
+.container-imagem-cego {
+  margin: var(--space-md) 0;
+}
+
+.imagem-recebida {
+  max-width: 100%;
+  max-height: 360px;
+  display: block;
+  margin: 0 auto;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-primary);
+}
+
+.descricao-imagem {
+  background-color: var(--color-bg);
+  border-left: 6px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  font-size: 1.25rem;
+  line-height: 1.55;
+  color: var(--color-text);
+  margin-top: var(--space-md);
+}
+
+.controles-tts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+
+.controles-tts > .btn {
+  min-height: 56px;
+  font-size: 1.1rem;
+}
+
+.controles-tts__config {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 2px solid var(--color-text-muted);
+}
+
+.controles-tts__config label {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.controles-tts__config input[type="range"] {
+  width: 100%;
+  height: 32px;
+  accent-color: var(--color-primary);
+}
+
+.controles-tts__config input[type="range"]:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 4px;
+}

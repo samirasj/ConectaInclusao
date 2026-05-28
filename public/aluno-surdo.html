@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConectaInclusao - Aluno Surdo</title>
+  <link rel="stylesheet" href="/css/base.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+</head>
+<body>
+  <main class="container" role="main">
+    <header class="page-header">
+      <h1>Aluno Surdo</h1>
+      <a class="back-link" href="/">Voltar</a>
+    </header>
+
+    <section id="secao-entrar" class="card" aria-label="Entrar na sala">
+      <form id="form-entrar" class="form-entrada">
+        <label for="codigo">Código da sala (6 caracteres)</label>
+        <input
+          type="text"
+          id="codigo"
+          name="codigo"
+          class="input-codigo"
+          maxlength="6"
+          minlength="6"
+          autocomplete="off"
+          required
+          aria-describedby="codigo-ajuda" />
+        <span id="codigo-ajuda" class="codigo-sala__label">Peça o código ao seu professor</span>
+        <button type="submit" class="btn btn--bloco">Entrar na sala</button>
+      </form>
+    </section>
+
+    <section id="secao-aula" class="card hidden" aria-label="Conteúdo da aula">
+      <p id="status-aula" class="codigo-sala__label">Aguardando o professor...</p>
+      <p id="status-vlibras" class="captacao__status">Carregando avatar de Libras...</p>
+
+      <div class="aluno-surdo__grid">
+        <div class="aluno-surdo__legendas">
+          <div id="legenda" class="legenda legenda--vazia" aria-label="Última fala do professor">
+            As legendas aparecerão aqui.
+          </div>
+          <ul id="historico-falas" class="historico-falas" aria-label="Falas anteriores"></ul>
+        </div>
+
+        <!-- Container do Player Unity do VLibras.
+             O vlibras-player-webjs injeta o canvas WebGL aqui. -->
+        <div
+          id="vlibras-player"
+          class="vlibras-player"
+          aria-label="Avatar 3D traduzindo em Libras"
+        ></div>
+      </div>
+
+      <div id="container-imagem"></div>
+    </section>
+
+    <div id="aviso" class="aviso hidden" role="status" aria-live="polite"></div>
+  </main>
+
+  <!-- Biblioteca oficial vlibras-player-webjs via esm.sh.
+       O UMD publicado no npm está incompleto (faltam classes core);
+       a build ESM contém o VLibrasPlayer real e expõe player.translate()
+       para tradução automática sem interação do usuário. -->
+  <script type="module">
+    import { VLibrasPlayer } from 'https://esm.sh/vlibras-player-webjs@2.4.2';
+    window.VLibrasPlayer = VLibrasPlayer;
+    window.dispatchEvent(new CustomEvent('vlibras:ready'));
+  </script>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/aluno-surdo.js"></script>
+</body>
+</html>

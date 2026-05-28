@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConectaInclusao - Professor</title>
+  <link rel="stylesheet" href="/css/base.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+</head>
+<body>
+  <main class="container" role="main">
+    <header class="page-header">
+      <h1>Painel do Professor</h1>
+      <a class="back-link" href="/">Voltar</a>
+    </header>
+
+    <section id="secao-criar" class="card" aria-label="Criar nova aula">
+      <form id="form-aula" class="form-aula">
+        <label for="nome-aula">Nome da aula (opcional)</label>
+        <input type="text" id="nome-aula" name="nome-aula" placeholder="Ex.: Matemática - 7º ano" />
+        <button type="submit" class="btn btn--bloco" id="btn-criar">Criar sala</button>
+      </form>
+    </section>
+
+    <section id="secao-sala" class="card hidden" aria-label="Sala em andamento">
+      <div class="codigo-sala">
+        <p class="codigo-sala__label">Código da sala</p>
+        <p class="codigo-sala__valor" id="codigo-sala" aria-live="polite">------</p>
+      </div>
+
+      <div class="badges" aria-label="Alunos conectados">
+        <div class="badge">
+          <span class="badge__numero" id="contagem-surdos">0</span>
+          <span class="badge__rotulo">Alunos surdos</span>
+        </div>
+        <div class="badge">
+          <span class="badge__numero" id="contagem-cegos">0</span>
+          <span class="badge__rotulo">Alunos cegos</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="secao-captacao" class="card hidden" aria-label="Captação de áudio do professor">
+      <div class="captacao">
+        <button type="button" class="btn btn--bloco btn--captacao" id="btn-captacao" aria-pressed="false">
+          <span class="captacao__icone" aria-hidden="true">🎤</span>
+          <span class="captacao__rotulo" id="btn-captacao-rotulo">Iniciar captação</span>
+        </button>
+        <p id="captacao-status" class="captacao__status" role="status" aria-live="polite">Pronto.</p>
+        <div id="captacao-previa" class="captacao__previa" aria-label="Prévia do que está sendo reconhecido"></div>
+      </div>
+    </section>
+
+    <section id="secao-fala" class="card hidden" aria-label="Enviar mensagem manual para a turma">
+      <form id="form-fala" class="form-fala">
+        <label for="texto-fala">Mensagem manual (fallback)</label>
+        <textarea id="texto-fala" name="texto-fala" placeholder="Use se o microfone não estiver disponível..."></textarea>
+        <button type="submit" class="btn">Enviar mensagem</button>
+      </form>
+    </section>
+
+    <section id="secao-imagem" class="card hidden" aria-label="Enviar imagem com audiodescrição">
+      <h2 class="secao-titulo">Enviar imagem (com audiodescrição automática)</h2>
+      <p class="secao-descricao">
+        Selecione uma imagem. A IA descreverá automaticamente em português,
+        e a descrição será lida em voz para o aluno cego e traduzida em
+        Libras para o aluno surdo.
+      </p>
+
+      <div class="form-imagem">
+        <label for="input-imagem" class="btn btn--bloco btn--imagem">
+          <span aria-hidden="true">📷</span>
+          <span id="rotulo-input-imagem">Selecionar imagem</span>
+        </label>
+        <input
+          type="file"
+          id="input-imagem"
+          name="input-imagem"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          class="input-imagem-oculto" />
+
+        <div id="preview-imagem-wrapper" class="preview-imagem-wrapper hidden">
+          <img id="preview-imagem" alt="Pré-visualização da imagem selecionada" />
+        </div>
+
+        <p id="status-imagem" class="captacao__status" role="status" aria-live="polite"></p>
+
+        <label for="legenda-imagem" id="label-legenda-imagem" class="hidden">
+          Legenda gerada (você pode editar antes de enviar)
+        </label>
+        <textarea
+          id="legenda-imagem"
+          class="legenda-imagem hidden"
+          rows="4"
+          placeholder="A descrição automática aparecerá aqui..."></textarea>
+
+        <div id="botoes-imagem" class="botoes-imagem hidden">
+          <button type="button" id="btn-descrever-novamente" class="btn">Gerar nova descrição</button>
+          <button type="button" id="btn-enviar-imagem" class="btn btn--bloco">Enviar para a turma</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="secao-encerrar" class="card hidden">
+      <button type="button" class="btn btn--perigo btn--bloco" id="btn-encerrar">Encerrar aula</button>
+    </section>
+
+    <div id="aviso" class="aviso hidden" role="status" aria-live="polite"></div>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/professor.js"></script>
+</body>
+</html>
