@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ConectaInclusão
 
 Sala de aula virtual acessível para alunos com deficiência (surdos e cegos) em escolas públicas. Projeto educacional desenvolvido para o **CETI Prof. Ubiraci Carvalho** (São João da Serra/PI).
@@ -28,6 +27,7 @@ A aplicação permite que um professor crie uma sala, capte sua fala por microfo
 9. [Troubleshooting](#troubleshooting)
 
 ---
+
 
 ## Stack e arquitetura
 
@@ -644,7 +644,3 @@ O alfabeto exclui `I`, `O`, `0`, `1` para evitar confusão visual e ambiguidade 
 - **Avatares:** Ícaro e Hozana — personagens oficiais do VLibras
 - **Translator API:** `traducao2.vlibras.gov.br/translate` (gov.br)
 - **Player Unity:** hospedado em `vlibras.gov.br/app/target/`
-=======
-# ConectaInclusao
-Trabalho Escolar
->>>>>>> 9f240f2df006832def414b4a964bcefd6c276ff8
