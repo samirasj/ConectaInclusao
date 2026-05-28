@@ -28,7 +28,6 @@ A aplicação permite que um professor crie uma sala, capte sua fala por microfo
 
 ---
 
-
 ## Stack e arquitetura
 
 | Camada | Tecnologia | Por quê |
