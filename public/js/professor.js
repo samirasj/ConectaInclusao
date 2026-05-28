@@ -22,6 +22,12 @@
   const captacaoStatus = document.getElementById('captacao-status');
   const captacaoPrevia = document.getElementById('captacao-previa');
 
+  // ---------- Elementos do Módulo 6 (microfone WebRTC) ----------
+  const secaoMicrofone = document.getElementById('secao-microfone');
+  const btnMicrofone = document.getElementById('btn-microfone');
+  const btnMicrofoneRotulo = document.getElementById('btn-microfone-rotulo');
+  const statusMicrofone = document.getElementById('status-microfone');
+
   // ---------- Elementos do Módulo 5 (imagem + audiodescrição) ----------
   const secaoImagem = document.getElementById('secao-imagem');
   const inputImagem = document.getElementById('input-imagem');
@@ -260,14 +266,180 @@
     secaoEncerrar.classList.add('hidden');
   });
 
+  // Geração e cópia de link pré-preenchido com o código.
+  function montarLinkAluno(perfil, codigo) {
+    return `${window.location.origin}/aluno-${perfil}.html?codigo=${codigo}`;
+  }
+
+  async function copiarLink(perfil) {
+    const codigo = codigoEl.textContent;
+    if (!codigo || codigo === '------') return;
+    const link = montarLinkAluno(perfil, codigo);
+    const statusEl = document.getElementById('link-copia-status');
+    try {
+      await navigator.clipboard.writeText(link);
+      statusEl.textContent = '✓ Link copiado para ' + perfil + '. Cole no chat da escola, e-mail ou WhatsApp.';
+      statusEl.classList.add('captacao__status--ativo');
+      statusEl.classList.remove('captacao__status--erro');
+    } catch (e) {
+      // Fallback: mostra o link em um prompt para o usuário copiar manualmente.
+      statusEl.textContent = link;
+      statusEl.classList.add('captacao__status--erro');
+    }
+  }
+
+  document.getElementById('btn-copiar-link-surdo').addEventListener('click', () => copiarLink('surdo'));
+  document.getElementById('btn-copiar-link-cego').addEventListener('click', () => copiarLink('cego'));
+
   C.onEvento('sala_criada', (data) => {
     codigoEl.textContent = data.codigo;
     secaoSala.classList.remove('hidden');
     secaoCaptacao.classList.remove('hidden');
+    secaoMicrofone.classList.remove('hidden');
     secaoFala.classList.remove('hidden');
     secaoImagem.classList.remove('hidden');
     secaoEncerrar.classList.remove('hidden');
     formAula.classList.add('hidden');
+
+    // Auto-start do microfone — voz ao vivo do professor já pronta
+    // assim que a sala existe. Se o navegador negar microfone, o
+    // botão fica disponível para tentar manualmente.
+    ligarMicrofone().catch(() => {
+      mostrarAviso(
+        'Não foi possível ligar o microfone automaticamente. ' +
+        'Use o botão "Compartilhar minha voz" quando estiver pronto.',
+        true
+      );
+    });
+  });
+
+  // ============================================================
+  // Módulo 6 — Microfone do professor → áudio WebRTC para alunos.
+  // Mesh 1-N: professor cria uma RTCPeerConnection por aluno.
+  // Quando o áudio é mutado/desmutado, mantemos as conexões e só
+  // alteramos track.enabled — mais rápido que recriar.
+  // ============================================================
+  const peersAlunos = new Map(); // socketId do aluno -> RTCPeerConnection
+  let streamLocal = null;
+  let microfoneAtivo = false;
+
+  const RTC_CONFIG = {
+    // Sem STUN para teste local. Para múltiplas redes, adicione um STUN público.
+    iceServers: []
+  };
+
+  function atualizarUiMicrofone() {
+    btnMicrofone.setAttribute('aria-pressed', microfoneAtivo ? 'true' : 'false');
+    btnMicrofone.classList.toggle('btn--microfone-ativo', microfoneAtivo);
+    btnMicrofoneRotulo.textContent = microfoneAtivo
+      ? '🔴 Desligar voz'
+      : 'Compartilhar minha voz';
+    statusMicrofone.textContent = microfoneAtivo
+      ? '🔴 Transmitindo voz para a turma.'
+      : 'Microfone desligado.';
+    statusMicrofone.classList.toggle('captacao__status--ativo', microfoneAtivo);
+  }
+
+  async function ligarMicrofone() {
+    if (microfoneAtivo) return true;
+    try {
+      streamLocal = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        video: false
+      });
+    } catch (e) {
+      statusMicrofone.textContent = 'Permissão de microfone negada: ' + (e.message || e);
+      statusMicrofone.classList.add('captacao__status--erro');
+      throw e;
+    }
+    microfoneAtivo = true;
+    atualizarUiMicrofone();
+    // Avisa o servidor → alunos solicitarão áudio → caem nos handlers abaixo.
+    C.enviarStatusAudio(true);
+    return true;
+  }
+
+  function desligarMicrofone() {
+    microfoneAtivo = false;
+    if (streamLocal) {
+      streamLocal.getTracks().forEach((t) => t.stop());
+      streamLocal = null;
+    }
+    // Fecha todas as peer connections.
+    for (const [, pc] of peersAlunos) {
+      try { pc.close(); } catch (e) {}
+    }
+    peersAlunos.clear();
+    C.enviarStatusAudio(false);
+    atualizarUiMicrofone();
+  }
+
+  btnMicrofone.addEventListener('click', () => {
+    if (microfoneAtivo) desligarMicrofone();
+    else ligarMicrofone();
+  });
+
+  async function criarOfertaParaAluno(alunoSocketId) {
+    if (!streamLocal || !microfoneAtivo) return;
+    if (peersAlunos.has(alunoSocketId)) {
+      try { peersAlunos.get(alunoSocketId).close(); } catch (e) {}
+    }
+    const pc = new RTCPeerConnection(RTC_CONFIG);
+    peersAlunos.set(alunoSocketId, pc);
+
+    streamLocal.getAudioTracks().forEach((t) => pc.addTrack(t, streamLocal));
+
+    pc.onicecandidate = (ev) => {
+      if (ev.candidate) {
+        C.enviarSinalWebRtc(alunoSocketId, 'ice', ev.candidate);
+      }
+    };
+    pc.onconnectionstatechange = () => {
+      console.log('[WebRTC] aluno', alunoSocketId, '→', pc.connectionState);
+      if (['failed', 'disconnected', 'closed'].includes(pc.connectionState)) {
+        peersAlunos.delete(alunoSocketId);
+      }
+    };
+
+    try {
+      const offer = await pc.createOffer({ offerToReceiveAudio: false });
+      await pc.setLocalDescription(offer);
+      C.enviarSinalWebRtc(alunoSocketId, 'offer', offer);
+    } catch (e) {
+      console.warn('[WebRTC] erro ao ofertar para', alunoSocketId, e);
+    }
+  }
+
+  // Servidor avisa que um aluno pediu áudio (entrou após o mic ligar).
+  C.onEvento('aluno_pede_audio', (data) => {
+    if (!data || !data.alunoSocketId) return;
+    criarOfertaParaAluno(data.alunoSocketId);
+  });
+
+  C.onEvento('webrtc_signal', async (data) => {
+    if (!data) return;
+    const { origem, tipo, dados } = data;
+    const pc = peersAlunos.get(origem);
+    if (!pc) return;
+    try {
+      if (tipo === 'answer') {
+        await pc.setRemoteDescription(dados);
+      } else if (tipo === 'ice') {
+        await pc.addIceCandidate(dados);
+      }
+    } catch (e) {
+      console.warn('[WebRTC] erro signal', tipo, e);
+    }
+  });
+
+  // Se um aluno sai, derruba a peer connection dele.
+  C.onEvento('aluno_saiu', () => {
+    // O servidor não manda quem saiu (anonimato). Limpamos PCs órfãs por estado.
+    for (const [id, pc] of peersAlunos) {
+      if (['failed', 'closed', 'disconnected'].includes(pc.connectionState)) {
+        peersAlunos.delete(id);
+      }
+    }
   });
 
   // ============================================================
@@ -397,5 +569,65 @@
     contagemSurdos.textContent = data.surdos;
     contagemCegos.textContent = data.cegos;
     mostrarAviso(`Um aluno ${data.perfil || ''} saiu. Total: ${data.total}.`);
+  });
+
+  // ============================================================
+  // Painel de mãos levantadas
+  // ============================================================
+  const ROTULOS_SINAL = {
+    duvida: { icone: '🖐', texto: 'Tem dúvida' },
+    rapido: { icone: '🐢', texto: 'Está rápido' },
+    repetir: { icone: '🔁', texto: 'Pede para repetir' }
+  };
+  const painelMaos = document.getElementById('painel-maos');
+  const maosLevantadas = []; // { alunoSocketId, perfil, tipo, ts }
+
+  function renderizarMaos() {
+    if (maosLevantadas.length === 0) {
+      painelMaos.innerHTML =
+        '<p class="codigo-sala__label">Pedidos dos alunos: nenhum</p>';
+      return;
+    }
+    painelMaos.innerHTML = '';
+    maosLevantadas.forEach((m, idx) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'pilula-mao';
+      const rotulo = ROTULOS_SINAL[m.tipo] || { icone: '❔', texto: m.tipo };
+      card.innerHTML =
+        `<span class="pilula-mao__icone" aria-hidden="true">${rotulo.icone}</span>` +
+        `<span class="pilula-mao__perfil">Aluno ${m.perfil}</span>` +
+        `<span class="pilula-mao__motivo">${rotulo.texto}</span>` +
+        '<span class="pilula-mao__atender">✓ atender</span>';
+      card.title = 'Clique para atender e remover este pedido.';
+      card.addEventListener('click', () => {
+        C.atenderMao(m.alunoSocketId);
+        maosLevantadas.splice(idx, 1);
+        renderizarMaos();
+      });
+      painelMaos.appendChild(card);
+    });
+  }
+
+  C.onEvento('aluno_sinalizou', (data) => {
+    if (!data || !data.tipo) return;
+    // Evita duplicatas do mesmo aluno+tipo (debounce visual).
+    const existente = maosLevantadas.find(
+      (m) => m.alunoSocketId === data.alunoSocketId && m.tipo === data.tipo
+    );
+    if (existente) {
+      existente.timestamp = data.timestamp;
+      return;
+    }
+    maosLevantadas.push(data);
+    renderizarMaos();
+    const rotulo = ROTULOS_SINAL[data.tipo] || { texto: data.tipo };
+    mostrarAviso(`✋ Aluno ${data.perfil}: ${rotulo.texto}`);
+  });
+
+  C.onEvento('aluno_saiu', () => {
+    // Limpa mãos órfãs (aluno que saiu).
+    // Como não temos socketId no aluno_saiu, mantemos a entrada e
+    // o professor remove manualmente clicando.
   });
 })();

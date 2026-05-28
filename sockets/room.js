@@ -69,7 +69,11 @@ function register(io) {
       socket.join(codigo);
 
       const contagem = contagemPorPerfil(sala);
-      socket.emit('entrada_confirmada', { codigo, perfil });
+      socket.emit('entrada_confirmada', {
+        codigo,
+        perfil,
+        audioProfessorAtivo: !!sala.audioAtivo
+      });
       io.to(codigo).emit('aluno_entrou', {
         perfil,
         total: contagem.total,
@@ -96,6 +100,82 @@ function register(io) {
         dataUrl,
         legenda: payload.legenda || '',
         timestamp: Date.now()
+      });
+    });
+
+    // ============================================================
+    // WebRTC — voz do professor em tempo real para os alunos.
+    // O servidor só faz signaling (encaminha mensagens entre peers).
+    // Áudio em si é P2P, não passa pelo servidor.
+    // ============================================================
+
+    // Professor sinaliza que ativou/desativou o microfone para a turma.
+    socket.on('audio_professor_status', (payload) => {
+      const codigo = socket.data.codigo;
+      if (!codigo || socket.data.papel !== 'professor') return;
+      const sala = salas.get(codigo);
+      if (!sala) return;
+      sala.audioAtivo = !!(payload && payload.ativo);
+      io.to(codigo).emit('audio_professor_status', { ativo: sala.audioAtivo });
+      console.log(`[room] audio professor em ${codigo}: ${sala.audioAtivo ? 'ATIVO' : 'INATIVO'}`);
+    });
+
+    // Aluno solicita áudio do professor (após entrar ou após o professor ativar).
+    socket.on('solicitar_audio_professor', () => {
+      const codigo = socket.data.codigo;
+      if (!codigo || socket.data.papel !== 'aluno') return;
+      const sala = salas.get(codigo);
+      if (!sala || !sala.professor) return;
+      // Avisa o professor: "esse aluno quer áudio, crie uma offer pra ele".
+      io.to(sala.professor).emit('aluno_pede_audio', {
+        alunoSocketId: socket.id,
+        perfil: socket.data.perfil
+      });
+    });
+
+    // ============================================================
+    // Sinalização "levantar mão" (aluno → professor).
+    // tipo: 'duvida' | 'rapido' | 'repetir'
+    // ============================================================
+    const TIPOS_SINAL_VALIDOS = ['duvida', 'rapido', 'repetir'];
+    socket.on('aluno_sinaliza', (payload) => {
+      const codigo = socket.data.codigo;
+      if (!codigo || socket.data.papel !== 'aluno') return;
+      const sala = salas.get(codigo);
+      if (!sala || !sala.professor) return;
+      const tipo = payload && payload.tipo;
+      if (!TIPOS_SINAL_VALIDOS.includes(tipo)) return;
+      io.to(sala.professor).emit('aluno_sinalizou', {
+        alunoSocketId: socket.id,
+        perfil: socket.data.perfil,
+        tipo,
+        timestamp: Date.now()
+      });
+    });
+
+    // Professor reconhece uma mão levantada (a remove do painel).
+    socket.on('professor_atende', (payload) => {
+      const codigo = socket.data.codigo;
+      if (!codigo || socket.data.papel !== 'professor') return;
+      const alunoSocketId = payload && payload.alunoSocketId;
+      if (!alunoSocketId) return;
+      io.to(alunoSocketId).emit('mao_atendida');
+    });
+
+    // Sinal WebRTC genérico (offer/answer/ice) entre dois sockets.
+    // Payload: { destino: socketId, tipo: 'offer'|'answer'|'ice', dados }
+    socket.on('webrtc_signal', (payload) => {
+      const codigo = socket.data.codigo;
+      if (!codigo) return;
+      const destino = payload && payload.destino;
+      if (!destino) return;
+      // Só encaminha se o destino está na mesma sala (defesa simples).
+      const socketDestino = io.sockets.sockets.get(destino);
+      if (!socketDestino || socketDestino.data.codigo !== codigo) return;
+      io.to(destino).emit('webrtc_signal', {
+        origem: socket.id,
+        tipo: payload.tipo,
+        dados: payload.dados
       });
     });
 

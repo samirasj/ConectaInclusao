@@ -54,6 +54,22 @@
       </div>
 
       <div id="container-imagem"></div>
+
+      <section class="painel-sinalizar" aria-label="Pedir a palavra ao professor">
+        <h2 class="secao-titulo">Sinalizar ao professor</h2>
+        <div class="painel-sinalizar__botoes">
+          <button type="button" class="btn btn--bloco btn--sinal" data-tipo="duvida">
+            <span aria-hidden="true">🖐</span> Tenho uma dúvida
+          </button>
+          <button type="button" class="btn btn--bloco btn--sinal" data-tipo="rapido">
+            <span aria-hidden="true">🐢</span> Está rápido demais
+          </button>
+          <button type="button" class="btn btn--bloco btn--sinal" data-tipo="repetir">
+            <span aria-hidden="true">🔁</span> Pode repetir?
+          </button>
+        </div>
+        <p id="status-sinal" class="captacao__status" role="status" aria-live="polite"></p>
+      </section>
     </section>
 
     <div id="aviso" class="aviso hidden" role="status" aria-live="polite"></div>

@@ -19,6 +19,18 @@
     inputCodigo.value = inputCodigo.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
   });
 
+  // Auto-preenche se o link veio com ?codigo=XYZ123. Não auto-submete
+  // porque o avatar VLibras precisa de gesture do usuário para começar.
+  const paramCodigo = new URLSearchParams(window.location.search).get('codigo');
+  if (paramCodigo && /^[A-Z0-9]{6}$/.test(paramCodigo.toUpperCase())) {
+    inputCodigo.value = paramCodigo.toUpperCase();
+    const btn = formEntrar.querySelector('button[type="submit"]');
+    if (btn) {
+      btn.focus();
+      btn.textContent = '👉 Entrar agora na sala ' + paramCodigo.toUpperCase();
+    }
+  }
+
   function mostrarAviso(msg, erro) {
     aviso.textContent = msg;
     aviso.classList.remove('hidden', 'aviso--erro');
@@ -333,5 +345,30 @@
     } else {
       mostrarAviso(`Erro: ${data.motivo}`, true);
     }
+  });
+
+  // ============================================================
+  // Sinalizar ao professor (levantar mão).
+  // ============================================================
+  const TEXTOS_SINAL = {
+    duvida: '✓ Dúvida enviada ao professor.',
+    rapido: '✓ Pedido enviado: está rápido demais.',
+    repetir: '✓ Pedido enviado: pode repetir.'
+  };
+  const statusSinal = document.getElementById('status-sinal');
+  document.querySelectorAll('.btn--sinal').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tipo = btn.dataset.tipo;
+      C.sinalizar(tipo);
+      statusSinal.textContent = TEXTOS_SINAL[tipo] || '✓ Sinal enviado.';
+      statusSinal.classList.add('captacao__status--ativo');
+      btn.disabled = true;
+      setTimeout(() => { btn.disabled = false; }, 4000);
+    });
+  });
+
+  C.onEvento('mao_atendida', () => {
+    statusSinal.textContent = '✓ Professor reconheceu seu pedido.';
+    statusSinal.classList.add('captacao__status--ativo');
   });
 })();

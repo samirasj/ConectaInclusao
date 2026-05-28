@@ -450,6 +450,143 @@
 }
 
 /* ============================================================
+   Módulo 6 — Botão de microfone WebRTC do professor
+   ============================================================ */
+
+.btn--microfone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.btn--microfone-ativo {
+  background-color: #c0392b !important;
+  color: #fff !important;
+  border-color: #c0392b !important;
+  animation: pulsar-microfone 1.8s ease-in-out infinite;
+}
+
+@keyframes pulsar-microfone {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.7); }
+  50% { box-shadow: 0 0 0 12px rgba(192, 57, 43, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn--microfone-ativo { animation: none; }
+}
+
+/* ============================================================
+   Links rápidos para alunos (professor)
+   ============================================================ */
+.links-aluno {
+  margin: var(--space-md) 0;
+  padding: var(--space-md);
+  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-primary);
+}
+.links-aluno__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+.links-aluno__lista .btn {
+  flex: 1 1 240px;
+}
+
+/* ============================================================
+   Painel de mãos levantadas (professor)
+   ============================================================ */
+.painel-maos {
+  margin-top: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.pilula-mao {
+  display: grid;
+  grid-template-columns: 48px 1fr auto auto;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background-color: #fff3cd;
+  color: #5a4500;
+  border: 2px solid #ffd23f;
+  border-radius: var(--radius-md);
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+.pilula-mao:hover, .pilula-mao:focus-visible {
+  background-color: #ffe69c;
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.pilula-mao__icone { font-size: 1.8rem; }
+.pilula-mao__perfil { text-transform: capitalize; }
+.pilula-mao__atender {
+  background-color: #2d6a4f;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+/* ============================================================
+   Painel de sinalizar (alunos)
+   ============================================================ */
+.painel-sinalizar {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+.painel-sinalizar__botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin: var(--space-sm) 0;
+}
+.btn--sinal {
+  flex: 1 1 200px;
+  min-height: 64px;
+  font-size: 1.1rem;
+  background-color: #f5f7fa;
+  color: #0b1d2a;
+  border: 3px solid var(--color-primary);
+}
+.btn--sinal:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  color: #0b1d2a;
+}
+.btn--sinal:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   Card de áudio do professor (aluno cego)
+   ============================================================ */
+.audio-professor-card {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.audio-professor-card .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================
    Aluno cego — preview de imagem + audiodescrição + controles TTS
    ============================================================ */
 

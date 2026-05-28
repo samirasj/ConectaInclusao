@@ -5,7 +5,7 @@ Sala de aula virtual acessível para alunos com deficiência (surdos e cegos) em
 A aplicação permite que um professor crie uma sala, capte sua fala por microfone, e que dois tipos de alunos acompanhem a aula de forma sincronizada e adaptada:
 
 - **Aluno surdo** — recebe legendas grandes em tempo real + **avatar 3D do VLibras traduzindo automaticamente para Libras**.
-- **Aluno cego** — recebe síntese de voz (TTS) automática de cada fala do professor + **audiodescrição de imagens** gerada pela Groq API (Llama 4 multimodal).
+- **Aluno cego** — pode ouvir a **voz real do professor ao vivo** (WebRTC) ou, quando o professor desliga o microfone, cai automaticamente para síntese de voz (TTS) lendo a transcrição. Audiodescrição de imagens via Groq (Llama 4) é sempre falada por TTS.
 
 ---
 
@@ -20,6 +20,8 @@ A aplicação permite que um professor crie uma sala, capte sua fala por microfo
    - [Aluno surdo com avatar 3D](#3-aluno-surdo--legendas--avatar-3d-em-libras)
    - [Aluno cego com TTS + audiodescrição](#4-aluno-cego--tts--audiodescrição-de-imagens)
    - [Imagem do professor → Groq → toda a turma](#5-imagem-do-professor--groq--toda-a-turma)
+   - [Voz ao vivo do professor (WebRTC)](#6-voz-ao-vivo-do-professor-webrtc)
+   - [Interatividade aluno ↔ professor](#7-interatividade-aluno--professor)
 5. [Eventos Socket.IO](#eventos-socketio)
 6. [Estudo técnico do VLibras](#estudo-técnico-do-vlibras--a-jornada-até-a-tradução-automática)
 7. [Limitações conhecidas](#limitações-conhecidas)
@@ -39,6 +41,7 @@ A aplicação permite que um professor crie uma sala, capte sua fala por microfo
 | Tradução para Libras | **vlibras-player-webjs** (ESM via esm.sh) + **proxy do Translator API** | Avatar 3D oficial do governo federal |
 | Audiodescrição de imagens | **Groq API** (`meta-llama/llama-4-scout-17b-16e-instruct`) | Tier gratuito real, sem cartão; Llama 4 multimodal; PT-BR |
 | Síntese de voz (TTS) | **Web Speech API** (`SpeechSynthesis`) | Nativo, zero custo, voz PT-BR |
+| Voz ao vivo do professor | **WebRTC** + Socket.IO (signaling) | Voz real do professor P2P, latência ~300ms |
 | Acessibilidade | **WCAG 2.1 AA** | Contraste, foco visível, `aria-live`, semântica HTML |
 
 **Sem banco de dados.** Salas são armazenadas em memória (`Map`) — adequado para a duração de uma aula. Para persistência futura (histórico, frequência), basta adicionar SQLite ou MySQL.
@@ -78,7 +81,7 @@ Web Speech API (STT pt-BR)
 ### Instalar
 
 ```bash
-npm install  // npm i
+npm install
 ```
 
 ### Rodar em produção (porta 3000)
@@ -372,6 +375,149 @@ A chave Groq é gratuita e sem cartão em [https://console.groq.com/keys](https:
 
 ---
 
+### 6. Voz ao vivo do professor (WebRTC)
+
+**Componentes:** [`public/js/professor.js`](public/js/professor.js) (botão microfone), [`public/js/aluno-cego.js`](public/js/aluno-cego.js) (receptor), [`sockets/room.js`](sockets/room.js) (signaling).
+
+**O que o professor controla:**
+
+- Botão **"🎙 Compartilhar minha voz"** na sua tela. Toggle simples on/off.
+- Quando **liga**: navegador pede permissão de microfone (uma vez). Botão fica vermelho pulsante e exibe *"🔴 Transmitindo voz para a turma."*
+- Quando **desliga**: todas as conexões WebRTC são fechadas, o microfone é liberado, e os alunos cegos voltam a ouvir a voz sintética (TTS) lendo a transcrição.
+
+**O que o aluno cego percebe:**
+
+| Estado | O que acontece |
+|---|---|
+| Professor com microfone **ligado** | Aluno cego ouve a **voz real do professor** ao vivo. TTS sintético das falas é **silenciado**. Audiodescrição de imagens continua sendo falada por TTS. |
+| Professor com microfone **desligado** | Aluno cego ouve **TTS sintético** lendo o que o STT transcreveu da fala do professor. |
+
+O aluno cego nunca precisa configurar nada — a transição é automática.
+
+**Por que isso é melhor que TTS puro:**
+
+- Voz natural do professor é muito mais agradável para horas de aula.
+- Entonação, ênfase, emoção — coisas que o TTS perde — passam direto.
+- Latência ~200-500ms (P2P) vs 1-2s do STT+TTS.
+
+**Arquitetura técnica (WebRTC mesh 1-N):**
+
+```
+                     Servidor Socket.IO (apenas signaling)
+                              │
+            ┌─────────────────┼─────────────────┐
+            │                 │                 │
+       Professor          Aluno cego 1     Aluno cego 2
+       (offerer)          (answerer)       (answerer)
+           ▲                 ▲                 ▲
+           │                 │                 │
+           └─── áudio P2P ───┘                 │
+           └────────── áudio P2P ──────────────┘
+```
+
+**Fluxo de signaling:**
+
+1. Professor clica no botão → `getUserMedia({audio:true})` → emite `audio_professor_status { ativo: true }`.
+2. Servidor retransmite o status a toda a sala.
+3. Cada aluno cego conectado recebe e emite `solicitar_audio_professor` → servidor encaminha para o professor.
+4. Professor cria `RTCPeerConnection` para esse aluno, anexa o audio track, faz offer, envia via `webrtc_signal { tipo: 'offer', destino: <socketIdAluno> }`.
+5. Aluno recebe a offer, cria sua peer connection, escuta `ontrack` (que injeta o stream no `<audio autoplay>`), gera answer, envia de volta.
+6. ICE candidates trafegam em ambos os sentidos via `webrtc_signal { tipo: 'ice' }`.
+7. Audio começa a tocar.
+
+**Quando um aluno entra DEPOIS do professor já estar transmitindo**: o servidor inclui `audioProfessorAtivo: true` no payload de `entrada_confirmada`, e o aluno faz a solicitação. O professor cria nova peer connection sob demanda.
+
+**Eventos Socket.IO adicionados pelo Módulo 6:**
+
+| Evento | Direção | Payload | Quando |
+|---|---|---|---|
+| `audio_professor_status` | professor → servidor → sala | `{ ativo: bool }` | Professor liga/desliga microfone |
+| `solicitar_audio_professor` | aluno → servidor → professor | (vazio) | Aluno quer áudio (após entrar ou ativar) |
+| `aluno_pede_audio` | servidor → professor | `{ alunoSocketId, perfil }` | Trigger para o professor criar offer |
+| `webrtc_signal` | qualquer → servidor → outro | `{ destino, tipo: 'offer'\|'answer'\|'ice', dados }` | Encaminhamento de signaling |
+
+**ICE config:**
+
+```js
+const RTC_CONFIG = { iceServers: [] };
+```
+
+Sem STUN configurado — funciona em **localhost e LAN**. Para uso em redes distintas (professor em casa, alunos na escola), adicione um STUN público:
+
+```js
+iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+```
+
+Para passar por NATs simétricos (raros, mas existem), precisaria de TURN — geralmente pago. Para o caso de uso de uma escola pública (todos na mesma rede), STUN não é necessário.
+
+**Limitações:**
+
+- O `getUserMedia` exige **HTTPS ou localhost** (mesma regra do STT).
+- WebRTC não funciona se firewall corporativo bloquear UDP — fallback para TCP é automático em casos simples.
+- O aluno **surdo** não recebe áudio (não foi implementado intencionalmente — não há benefício para o perfil).
+
+---
+
+### 7. Interatividade aluno ↔ professor
+
+Conjunto de melhorias para tornar a aula mais dinâmica e dar autonomia ao aluno PCD. **Originou-se de análise de UX feita por agente especialista** (top 3 quick wins).
+
+#### 7.1. Link com código pré-preenchido
+
+Em vez de ditar 6 caracteres em voz alta, o professor copia um link como:
+```
+http://servidor:3000/aluno-cego.html?codigo=AB23CD
+```
+A página do aluno lê `?codigo=` da URL, preenche o input, foca o botão de entrar e muda o rótulo para *"👉 Entrar agora na sala AB23CD"*. O aluno só dá um clique (gesture necessário para autoplay de TTS/áudio).
+
+Implementado em [professor.js](public/js/professor.js) (`copiarLink()`) e em [aluno-cego.js](public/js/aluno-cego.js) + [aluno-surdo.js](public/js/aluno-surdo.js) (leitura de `URLSearchParams`).
+
+#### 7.2. Levantar mão (aluno → professor)
+
+Três botões grandes no painel de cada aluno:
+- **🖐 Tenho uma dúvida**
+- **🐢 Está rápido demais**
+- **🔁 Pode repetir?**
+
+Aluno clica → emite `aluno_sinaliza { tipo }` → servidor encaminha ao professor como `aluno_sinalizou { alunoSocketId, perfil, tipo, timestamp }`.
+
+No professor, surge um painel `#painel-maos` com pílulas amarelas mostrando *"Aluno cego · Está rápido · ✓ atender"*. Clicar atende → emite `professor_atende { alunoSocketId }` → aluno recebe `mao_atendida` (confirmação visual + TTS para cego).
+
+Anti-spam: botão fica disabled por 4s após cada clique. Servidor faz deduplicação por aluno+tipo (não acumula duplicatas).
+
+#### 7.3. Histórico navegável e atalhos de teclado (aluno cego)
+
+Aluno cego mantém buffer das últimas 10 falas/audiodescrições. Atalhos globais:
+
+| Tecla | Ação |
+|---|---|
+| `↑` / `↓` | Navega no histórico (TTS anuncia *"Fala 3 de 10: ..."*) |
+| `Enter` | Relê o item atualmente selecionado |
+| `Espaço` | Pausa/retoma o TTS |
+| `R` | Repete a última fala recebida |
+| `M` | Muta/desmuta a voz ao vivo do professor |
+| `1` / `2` / `3` | Sinaliza dúvida / rápido / repetir |
+| `?` | Anuncia esta lista por TTS |
+
+Ao entrar pela primeira vez, o aluno cego ouve: *"Pressione interrogação a qualquer momento para ouvir os atalhos disponíveis."* — autonomia total.
+
+#### 7.4. Mute local da voz do professor (aluno cego)
+
+Botão **"Silenciar voz do professor"** no card de áudio. Quando ativado:
+- O elemento `<audio>` fica `muted = true` (não derruba conexão WebRTC, o professor continua transmitindo).
+- O aluno volta a usar TTS sintético para as falas.
+- Status muda para *"🔇 Você silenciou a voz do professor."*
+
+Atalho de teclado `M` toggle o mesmo.
+
+#### 7.5. Auto-start do microfone do professor
+
+Quando o professor cria a sala, `ligarMicrofone()` é chamado automaticamente — pede permissão e já fica transmitindo. Não precisa lembrar de clicar no botão de microfone para começar a aula.
+
+Se a permissão for negada, um aviso aparece e o botão permanece disponível para tentar manualmente.
+
+---
+
 ## Eventos Socket.IO
 
 | Evento | Direção | Payload | Quando |
@@ -389,6 +535,14 @@ A chave Groq é gratuita e sem cartão em [https://console.groq.com/keys](https:
 | `encerrar_sala` | professor → servidor | (vazio) | Botão "Encerrar aula" |
 | `sala_encerrada` | servidor → sala | `{ motivo }` | `PROFESSOR_ENCERROU` ou `PROFESSOR_SAIU` |
 | `erro` | servidor → cliente | `{ motivo }` | `SALA_NAO_ENCONTRADA`, `PERFIL_INVALIDO` |
+| `audio_professor_status` | professor → servidor → sala | `{ ativo: bool }` | Professor liga/desliga microfone WebRTC (Módulo 6) |
+| `solicitar_audio_professor` | aluno → servidor → professor | (vazio) | Aluno quer receber áudio (Módulo 6) |
+| `aluno_pede_audio` | servidor → professor | `{ alunoSocketId, perfil }` | Trigger para professor criar offer WebRTC (Módulo 6) |
+| `webrtc_signal` | qualquer → servidor → outro | `{ destino, tipo, dados }` | Encaminhamento de offer/answer/ICE (Módulo 6) |
+| `aluno_sinaliza` | aluno → servidor | `{ tipo: 'duvida'\|'rapido'\|'repetir' }` | Aluno levanta a mão (Módulo 7) |
+| `aluno_sinalizou` | servidor → professor | `{ alunoSocketId, perfil, tipo, timestamp }` | Mão levantada chega ao professor |
+| `professor_atende` | professor → servidor | `{ alunoSocketId }` | Professor reconhece o pedido |
+| `mao_atendida` | servidor → aluno | (vazio) | Confirma ao aluno que o professor viu |
 
 ---
 

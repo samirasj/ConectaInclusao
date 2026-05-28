@@ -28,6 +28,19 @@
         <p class="codigo-sala__valor" id="codigo-sala" aria-live="polite">------</p>
       </div>
 
+      <div class="links-aluno" aria-label="Links rápidos para os alunos">
+        <p class="codigo-sala__label">Compartilhe um destes links em vez de ditar o código:</p>
+        <div class="links-aluno__lista">
+          <button type="button" class="btn" id="btn-copiar-link-surdo">
+            📋 Copiar link para Aluno Surdo
+          </button>
+          <button type="button" class="btn" id="btn-copiar-link-cego">
+            📋 Copiar link para Aluno Cego
+          </button>
+        </div>
+        <p id="link-copia-status" class="captacao__status" role="status" aria-live="polite"></p>
+      </div>
+
       <div class="badges" aria-label="Alunos conectados">
         <div class="badge">
           <span class="badge__numero" id="contagem-surdos">0</span>
@@ -37,6 +50,15 @@
           <span class="badge__numero" id="contagem-cegos">0</span>
           <span class="badge__rotulo">Alunos cegos</span>
         </div>
+      </div>
+
+      <div
+        id="painel-maos"
+        class="painel-maos"
+        role="region"
+        aria-label="Pedidos dos alunos"
+        aria-live="polite">
+        <p class="codigo-sala__label">Pedidos dos alunos: nenhum</p>
       </div>
     </section>
 
@@ -49,6 +71,26 @@
         <p id="captacao-status" class="captacao__status" role="status" aria-live="polite">Pronto.</p>
         <div id="captacao-previa" class="captacao__previa" aria-label="Prévia do que está sendo reconhecido"></div>
       </div>
+    </section>
+
+    <section id="secao-microfone" class="card hidden" aria-label="Transmissão de voz ao vivo">
+      <h2 class="secao-titulo">Transmitir minha voz para a turma</h2>
+      <p class="secao-descricao">
+        Ao ligar, os alunos ouvirão sua voz em tempo real (WebRTC).
+        Enquanto a voz estiver ativa, os alunos cegos NÃO usarão a voz
+        sintética para as falas — só para audiodescrições de imagens.
+      </p>
+      <button
+        type="button"
+        class="btn btn--bloco btn--microfone"
+        id="btn-microfone"
+        aria-pressed="false">
+        <span aria-hidden="true">🎙</span>
+        <span id="btn-microfone-rotulo">Compartilhar minha voz</span>
+      </button>
+      <p id="status-microfone" class="captacao__status" role="status" aria-live="polite">
+        Microfone desligado.
+      </p>
     </section>
 
     <section id="secao-fala" class="card hidden" aria-label="Enviar mensagem manual para a turma">

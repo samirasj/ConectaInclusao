@@ -57,6 +57,43 @@
         aria-atomic="true"
         aria-label="Audiodescrição da imagem"></div>
 
+      <div class="audio-professor-card">
+        <p id="status-audio-professor" class="captacao__status" role="status" aria-live="polite">
+          Aguardando voz do professor.
+        </p>
+        <button
+          type="button"
+          id="btn-mutar-professor"
+          class="btn btn--bloco"
+          aria-pressed="false"
+          disabled>
+          <span aria-hidden="true">🔊</span>
+          <span id="btn-mutar-professor-rotulo">Silenciar voz do professor</span>
+        </button>
+        <p class="codigo-sala__label">
+          Ao silenciar, o leitor de texto volta a ler as falas do professor.
+        </p>
+      </div>
+
+      <!-- Áudio remoto do professor (WebRTC). Sem controles, autoplay. -->
+      <audio id="audio-professor" autoplay playsinline></audio>
+
+      <section class="painel-sinalizar" aria-label="Pedir a palavra ao professor">
+        <h2 class="secao-titulo">Sinalizar ao professor</h2>
+        <div class="painel-sinalizar__botoes">
+          <button type="button" class="btn btn--bloco btn--sinal" data-tipo="duvida">
+            <span aria-hidden="true">🖐</span> Tenho uma dúvida
+          </button>
+          <button type="button" class="btn btn--bloco btn--sinal" data-tipo="rapido">
+            <span aria-hidden="true">🐢</span> Está rápido demais
+          </button>
+          <button type="button" class="btn btn--bloco btn--sinal" data-tipo="repetir">
+            <span aria-hidden="true">🔁</span> Pode repetir?
+          </button>
+        </div>
+        <p id="status-sinal" class="captacao__status" role="status" aria-live="polite"></p>
+      </section>
+
       <section
         id="controles-tts"
         class="controles-tts"
