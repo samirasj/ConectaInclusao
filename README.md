@@ -176,7 +176,9 @@ ConectaInclusao/
 
 **Fluxo:**
 
-1. O professor clica em **"🎤 Iniciar captação"**.
+1. O professor clica emgit add . **"🎤 Iniciar captação"**.
+git commit -m "Resolvendo conflitos de merge"
+
 2. O navegador pede permissão para o microfone (uma vez por origem).
 3. Instancia `new (window.SpeechRecognition || window.webkitSpeechRecognition)()` com:
    - `lang = 'pt-BR'`
